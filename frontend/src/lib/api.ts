@@ -55,10 +55,10 @@ export async function getStudyPlan(planId: string) {
 /**
  * Generate study plan from uploaded syllabus
  */
-export async function generateStudyPlan(studyPlanId: string, hoursPerDay = 4) {
+export async function generateStudyPlan(studyPlanId: string, hoursPerDay = 4, examDate?: string) {
   return fetchAPI('/generate-study-plan', {
     method: 'POST',
-    body: JSON.stringify({ studyPlanId, hoursPerDay }),
+    body: JSON.stringify({ studyPlanId, hoursPerDay, examDate }),
   });
 }
 

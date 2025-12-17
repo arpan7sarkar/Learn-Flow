@@ -15,6 +15,9 @@ export function SyllabusUpload() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [timeline, setTimeline] = useState('7-days');
+  const [customAmount, setCustomAmount] = useState('3');
+  const [customUnit, setCustomUnit] = useState('days');
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -62,8 +65,24 @@ export function SyllabusUpload() {
       setProgress(60);
 
       if (uploadResult.success) {
+        // Calculate examDate based on timeline
+        const targetDate = new Date();
+        if (timeline === 'custom') {
+          const amount = parseInt(customAmount) || 1;
+          if (customUnit === 'hours') targetDate.setHours(targetDate.getHours() + amount);
+          else if (customUnit === 'days') targetDate.setDate(targetDate.getDate() + amount);
+          else if (customUnit === 'weeks') targetDate.setDate(targetDate.getDate() + (amount * 7));
+        } else {
+          const map: Record<string, number> = { '3-days': 3, '7-days': 7, '1-month': 30, '3-months': 90 };
+          targetDate.setDate(targetDate.getDate() + (map[timeline] || 7));
+        }
+
         // Generate study plan
-        const planResult = await generateStudyPlan(uploadResult.data.studyPlanId);
+        const planResult = await generateStudyPlan(
+          uploadResult.data.studyPlanId,
+          4,
+          targetDate.toISOString()
+        );
         setProgress(100);
 
         setAnalysisResult({
@@ -141,6 +160,53 @@ export function SyllabusUpload() {
                       <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => setFile(null)} disabled={uploading}>Change</Button>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-400 mb-3">Study Timeline</label>
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      {['3-days', '7-days', '1-month', '3-months', 'custom'].map((opt) => (
+                        <button
+                          key={opt}
+                          onClick={() => setTimeline(opt)}
+                          className={cn(
+                            "px-2 py-2 rounded-md text-xs border transition-colors truncate",
+                            timeline === opt
+                              ? "bg-nebula-purple border-nebula-purple text-white"
+                              : "bg-transparent border-gray-600 text-gray-300 hover:border-gray-400"
+                          )}
+                        >
+                          {opt.replace('-', ' ').toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+
+                    {timeline === 'custom' && (
+                      <div className="flex gap-4 p-4 bg-space-black/40 rounded-lg border border-white/10 animate-fade-in-up">
+                        <div className="flex-1">
+                          <label className="block text-xs text-gray-500 mb-1">Duration</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={customAmount}
+                            onChange={(e) => setCustomAmount(e.target.value)}
+                            className="w-full bg-space-black border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-nebula-purple outline-none"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-xs text-gray-500 mb-1">Unit</label>
+                          <select
+                            value={customUnit}
+                            onChange={(e) => setCustomUnit(e.target.value)}
+                            className="w-full bg-space-black border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-nebula-purple outline-none"
+                          >
+                            <option value="hours">Hours</option>
+                            <option value="days">Days</option>
+                            <option value="weeks">Weeks</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {uploading ? (

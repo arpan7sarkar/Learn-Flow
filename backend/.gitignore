@@ -1,3 +1,4 @@
 node_modules
 .env
 uploads/
+test_persistence.js
