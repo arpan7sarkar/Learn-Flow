@@ -2,10 +2,12 @@ import { Button } from "../components/ui/Button";
 import { Link } from "react-router-dom";
 import { BookOpen, Calendar, CheckCircle, Clock, Trophy, Upload, Loader2, MoreHorizontal, ArrowUpRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/clerk-react";
 import { getStudyCalendar, getStudyAnalytics } from "../lib/api";
 import { cn } from "../lib/utils";
 
 export function Dashboard() {
+  const { user, isLoaded } = useUser();
   const [loading, setLoading] = useState(true);
   const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
   const [stats, setStats] = useState({
@@ -16,22 +18,27 @@ export function Dashboard() {
   });
 
   useEffect(() => {
+    if (!isLoaded || !user) return;
+    
+    const userEmail = user.primaryEmailAddress?.emailAddress;
+    if (!userEmail) return;
+
     const fetchData = async () => {
       try {
         // Fetch study analytics for stats
-        const analyticsRes = await getStudyAnalytics();
+        const analyticsRes = await getStudyAnalytics(userEmail);
         if (analyticsRes.success && analyticsRes.data) {
           const { stats: analyticsStats } = analyticsRes.data;
           setStats({
-            topicsMastered: Object.keys(analyticsStats.topicDistribution || {}).length,
-            studyHours: analyticsStats.totalHours || 0,
-            tasksCompleted: analyticsStats.completedSessions || 0,
-            streak: analyticsStats.currentStreak || 0
+            topicsMastered: Object.keys(analyticsStats?.topicDistribution || {}).length,
+            studyHours: analyticsStats?.totalHours || 0,
+            tasksCompleted: analyticsStats?.completedSessions || 0,
+            streak: analyticsStats?.currentStreak || 0
           });
         }
 
         // Fetch calendar events for upcoming tasks
-        const calendarRes = await getStudyCalendar();
+        const calendarRes = await getStudyCalendar(userEmail);
         if (calendarRes.success && calendarRes.data) {
           const events = calendarRes.data.slice(0, 5);
           setUpcomingTasks(events.map((e: any) => ({
@@ -53,7 +60,7 @@ export function Dashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [isLoaded, user]);
 
   return (
     <div className="min-h-screen bg-brand-black text-brand-text pt-24 pb-12 font-inter px-4 sm:px-6 lg:px-8">

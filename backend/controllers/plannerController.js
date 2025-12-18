@@ -97,18 +97,21 @@ export const getStudyCalendar = async (req, res) => {
       }
       events = await CalendarEvent.find(query).sort({ date: 1, startTime: 1 });
     } else {
-      // Get the latest study plan for the demo user
-      const User = (await import('../models/User.js')).default;
-      const demoUser = await User.findOne({ email: 'demo@learnflow.com' });
+      // Get events for user by email
+      const userEmail = req.query.userEmail;
+      if (userEmail) {
+        const User = (await import('../models/User.js')).default;
+        const user = await User.findOne({ email: userEmail });
 
-      if (demoUser) {
-        // Get the most recent study plan
-        const latestPlan = await StudyPlan.findOne({ userId: demoUser._id })
-          .sort({ createdAt: -1 });
+        if (user) {
+          // Get the most recent study plan for this user
+          const latestPlan = await StudyPlan.findOne({ userId: user._id })
+            .sort({ createdAt: -1 });
 
-        if (latestPlan) {
-          events = await CalendarEvent.find({ studyPlanId: latestPlan._id })
-            .sort({ date: 1, startTime: 1 });
+          if (latestPlan) {
+            events = await CalendarEvent.find({ studyPlanId: latestPlan._id })
+              .sort({ date: 1, startTime: 1 });
+          }
         }
       }
     }
@@ -178,11 +181,16 @@ export const updateCalendarEvent = async (req, res) => {
  */
 export const clearCalendar = async (req, res) => {
   try {
-    const User = (await import('../models/User.js')).default;
-    const demoUser = await User.findOne({ email: 'demo@learnflow.com' });
+    const userEmail = req.query.userEmail || req.body.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
+    }
 
-    if (demoUser) {
-      await CalendarEvent.deleteMany({ userId: demoUser._id });
+    const User = (await import('../models/User.js')).default;
+    const user = await User.findOne({ email: userEmail });
+
+    if (user) {
+      await CalendarEvent.deleteMany({ userId: user._id });
     }
 
     res.json({
@@ -201,17 +209,18 @@ export const clearCalendar = async (req, res) => {
 export const getAllStudyPlans = async (req, res) => {
   try {
     const User = (await import('../models/User.js')).default;
-    // In real app, get userId from auth middleware. For now use demo or query param
-    let userId = req.query.userId;
-
-    if (!userId) {
-      const demoUser = await User.findOne({ email: 'demo@learnflow.com' });
-      if (demoUser) userId = demoUser._id;
+    const userEmail = req.query.userEmail;
+    
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
     }
 
-    if (!userId) {
-      return res.status(400).json({ error: 'User not identified' });
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      return res.json({ success: true, count: 0, data: [] });
     }
+    
+    const userId = user._id;
 
     const plans = await StudyPlan.find({ userId })
       .select('title subjects examDate createdAt hoursPerDay estimatedReadiness')
@@ -245,17 +254,19 @@ export const getAllStudyPlans = async (req, res) => {
 export const getStudyAnalytics = async (req, res) => {
   try {
     const User = (await import('../models/User.js')).default;
-    // In real app, get userId from auth middleware. For now use demo or query param
-    let userId = req.query.userId;
-
-    if (!userId) {
-      const demoUser = await User.findOne({ email: 'demo@learnflow.com' });
-      if (demoUser) userId = demoUser._id;
+    const userEmail = req.query.userEmail;
+    
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
     }
 
-    if (!userId) {
-      return res.status(400).json({ error: 'User not identified' });
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      // Return empty stats for new users
+      return res.json({ success: true, data: { stats: { totalSessions: 0, completedSessions: 0, completionRate: 0, totalHours: 0, currentStreak: 0, topicDistribution: {} }, analysis: null } });
     }
+    
+    const userId = user._id;
 
     // Get all calendar events
     const events = await CalendarEvent.find({ userId });

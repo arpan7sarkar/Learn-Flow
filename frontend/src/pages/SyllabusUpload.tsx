@@ -3,11 +3,14 @@ import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import { CheckCircle, FileText, UploadCloud, Calendar, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { cn } from "../lib/utils";
 import { uploadSyllabus, generateStudyPlan } from "../lib/api";
 
 export function SyllabusUpload() {
-  // const navigate = useNavigate();
+  const { user } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -54,15 +57,15 @@ export function SyllabusUpload() {
   };
 
   const startUpload = async () => {
-    if (!file) return;
+    if (!file || !userEmail) return;
     setUploading(true);
     setError(null);
     setProgress(10);
 
     try {
-      // Upload syllabus
+      // Upload syllabus with user email
       setProgress(30);
-      const uploadResult = await uploadSyllabus(file, planName || undefined);
+      const uploadResult = await uploadSyllabus(file, planName || undefined, userEmail);
       setProgress(60);
 
       if (uploadResult.success) {
@@ -78,11 +81,12 @@ export function SyllabusUpload() {
           targetDate.setDate(targetDate.getDate() + (map[timeline] || 7));
         }
 
-        // Generate study plan
+        // Generate study plan with user email
         const planResult = await generateStudyPlan(
           uploadResult.data.studyPlanId,
           4,
-          targetDate.toISOString()
+          targetDate.toISOString(),
+          userEmail
         );
         setProgress(100);
 

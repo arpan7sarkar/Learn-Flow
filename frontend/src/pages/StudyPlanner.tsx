@@ -5,6 +5,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useUser } from '@clerk/clerk-react';
 
 import { getStudyCalendar, updateCalendarEvent, getAllStudyPlans } from '../lib/api';
 import { Loader2, RefreshCw, Upload, BookOpen, Calendar as CalendarIcon, CheckCircle2, Circle, X, Clock, AlignLeft, History, FolderOpen } from 'lucide-react';
@@ -14,6 +15,9 @@ import { format } from 'date-fns';
 
 
 export function StudyPlanner() {
+  const { user } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,10 +36,11 @@ export function StudyPlanner() {
   };
 
   const handleViewHistory = async () => {
+    if (!userEmail) return;
     setHistoryOpen(true);
     setHistoryLoading(true);
     try {
-      const response = await getAllStudyPlans();
+      const response = await getAllStudyPlans(userEmail);
       if (response.success) {
         setStudyPlans(response.data);
       }
@@ -47,10 +52,11 @@ export function StudyPlanner() {
   };
 
   const fetchEvents = useCallback(async () => {
+    if (!userEmail) return;
     setLoading(true);
     setError(null);
     try {
-      const response = await getStudyCalendar(undefined, undefined, undefined, currentPlanId || undefined);
+      const response = await getStudyCalendar(userEmail, undefined, undefined, currentPlanId || undefined);
       if (response.success) {
         // FullCalendar accepts standard ISO strings or Date objects  
         // The API returns structured objects or ISO strings.
@@ -96,7 +102,7 @@ export function StudyPlanner() {
     } finally {
       setLoading(false);
     }
-  }, [currentPlanId]);
+  }, [currentPlanId, userEmail]);
 
   useEffect(() => {
     fetchEvents();
@@ -131,7 +137,7 @@ export function StudyPlanner() {
     } : e));
 
     try {
-      await updateCalendarEvent(selectedEvent.id, newCompleted);
+      await updateCalendarEvent(selectedEvent.id, newCompleted, userEmail);
     } catch (err) {
       console.error('Failed to update event');
       // Revert on failure

@@ -17,15 +17,15 @@ export const explainTopic = async (req, res) => {
       return res.status(400).json({ error: 'Topic is required' });
     }
 
-    // Get user (or demo)
-    let user;
-    if (userId) {
-      user = await User.findById(userId);
-    } else {
-      user = await User.findOne({ email: 'demo@learnflow.com' });
-      if (!user) {
-        user = await User.create({ email: 'demo@learnflow.com', name: 'Demo User' });
-      }
+    // Get user by email from request
+    const userEmail = req.body.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
+    }
+    
+    let user = await User.findOne({ email: userEmail });
+    if (!user) {
+      user = await User.create({ email: userEmail, name: userEmail.split('@')[0] });
     }
 
     // Get or create chat session
@@ -113,14 +113,13 @@ export const submitQuiz = async (req, res) => {
       return res.status(400).json({ error: 'Topic and answers are required' });
     }
 
-    // Get or create demo user
-    let user;
-    if (userId) {
-      user = await User.findById(userId);
-    } else {
-      user = await User.findOne({ email: 'demo@learnflow.com' });
+    // Get user by email from request
+    const userEmail = req.body.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
     }
-
+    
+    const user = await User.findOne({ email: userEmail });
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
     }
@@ -160,17 +159,14 @@ export const submitQuiz = async (req, res) => {
  */
 export const getQuizHistory = async (req, res) => {
   try {
-    const { userId } = req.query;
-
-    let user;
-    if (userId) {
-      user = await User.findById(userId);
-    } else {
-      user = await User.findOne({ email: 'demo@learnflow.com' });
+    const userEmail = req.query.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
     }
-
+    
+    const user = await User.findOne({ email: userEmail });
     if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.json({ success: true, data: [] });
     }
 
     const quizzes = await QuizResult.find({ userId: user._id })
@@ -192,17 +188,14 @@ export const getQuizHistory = async (req, res) => {
  */
 export const getChatHistory = async (req, res) => {
   try {
-    const { userId } = req.query;
-
-    let user;
-    if (userId) {
-      user = await User.findById(userId);
-    } else {
-      user = await User.findOne({ email: 'demo@learnflow.com' });
+    const userEmail = req.query.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
     }
-
+    
+    const user = await User.findOne({ email: userEmail });
     if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.json({ success: true, data: [] });
     }
 
     // Return list of sessions (id, topic, date) for sidebar
@@ -226,15 +219,12 @@ export const getChatHistory = async (req, res) => {
 export const getChatSession = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { userId } = req.query;
-
-    let user;
-    if (userId) {
-      user = await User.findById(userId);
-    } else {
-      user = await User.findOne({ email: 'demo@learnflow.com' });
+    const userEmail = req.query.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
     }
-
+    
+    const user = await User.findOne({ email: userEmail });
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
     }
@@ -257,15 +247,12 @@ export const getChatSession = async (req, res) => {
 export const deleteChatSession = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { userId } = req.query;
-
-    let user;
-    if (userId) {
-      user = await User.findById(userId);
-    } else {
-      user = await User.findOne({ email: 'demo@learnflow.com' });
+    const userEmail = req.query.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
     }
-
+    
+    const user = await User.findOne({ email: userEmail });
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
     }

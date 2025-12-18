@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
@@ -64,6 +65,9 @@ interface ModalInfo {
 }
 
 export function AITutor() {
+  const { user } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
@@ -111,8 +115,8 @@ export function AITutor() {
 
   // Load Sessions List
   useEffect(() => {
-    loadSessions();
-  }, []);
+    if (userEmail) loadSessions();
+  }, [userEmail]);
 
   // Check URL for session
   useEffect(() => {
@@ -136,8 +140,9 @@ export function AITutor() {
   };
 
   const loadSessions = async () => {
+    if (!userEmail) return;
     try {
-      const response = await getChatSessions();
+      const response = await getChatSessions(userEmail);
       if (response.success) {
         setSessions(response.data);
       }
@@ -147,8 +152,9 @@ export function AITutor() {
   };
 
   const loadSession = async (sessionId: string) => {
+    if (!userEmail) return;
     try {
-      const response = await getChatSession(sessionId);
+      const response = await getChatSession(sessionId, userEmail);
       if (response.success) {
         setCurrentSessionId(sessionId);
         setIsNewChat(false);
@@ -181,8 +187,9 @@ export function AITutor() {
       title: 'Delete Chat?',
       message: 'This will permanently remove this learning session. Are you sure?',
       onConfirm: async () => {
+        if (!userEmail) return;
         try {
-          const response = await deleteChatSession(sessionId);
+          const response = await deleteChatSession(sessionId, userEmail);
           if (response.success) {
             setSessions(prev => prev.filter(s => s._id !== sessionId));
             if (currentSessionId === sessionId) {
@@ -243,7 +250,8 @@ export function AITutor() {
       const response = await explainTopic(
         isNewChat ? topicToSend! : input,
         effectiveAnalogy,
-        currentSessionId || undefined
+        currentSessionId || undefined,
+        userEmail
       );
 
       if (response.success) {
@@ -281,7 +289,7 @@ export function AITutor() {
     try {
       // Use current session topic if available, or selected
       const topic = sessions.find(s => s._id === currentSessionId)?.topic || selectedTopic || customTopic;
-      const response = await generateQuiz(topic, 5);
+      const response = await generateQuiz(topic, 5, userEmail);
       if (response.success && response.data.questions) {
         setQuiz(response.data.questions);
       }
@@ -317,7 +325,7 @@ export function AITutor() {
     });
 
     try {
-      const response = await submitQuiz(topic, formattedAnswers);
+      const response = await submitQuiz(topic, formattedAnswers, userEmail);
       if (response.success) {
         setQuizResult(response.data);
         setQuizSubmitted(true);
