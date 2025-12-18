@@ -5,8 +5,9 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getStudyCalendar, updateCalendarEvent } from '../lib/api';
-import { Loader2, RefreshCw, Upload, BookOpen, Calendar as CalendarIcon, CheckCircle2, Circle, X, Clock, AlignLeft } from 'lucide-react';
+
+import { getStudyCalendar, updateCalendarEvent, getAllStudyPlans } from '../lib/api';
+import { Loader2, RefreshCw, Upload, BookOpen, Calendar as CalendarIcon, CheckCircle2, Circle, X, Clock, AlignLeft, History, FolderOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { format } from 'date-fns';
@@ -19,11 +20,37 @@ export function StudyPlanner() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const calendarRef = useRef<FullCalendar>(null);
 
+  // History State
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [studyPlans, setStudyPlans] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
+
+  const handleLoadPlan = (planId: string) => {
+    setCurrentPlanId(planId);
+    setHistoryOpen(false);
+  };
+
+  const handleViewHistory = async () => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const response = await getAllStudyPlans();
+      if (response.success) {
+        setStudyPlans(response.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch history", err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getStudyCalendar();
+      const response = await getStudyCalendar(undefined, undefined, undefined, currentPlanId || undefined);
       if (response.success) {
         // FullCalendar accepts standard ISO strings or Date objects
         // The API returns structured objects or ISO strings.
@@ -33,15 +60,15 @@ export function StudyPlanner() {
           // FullCalendar prefers ISO strings for performance/timezone
           let start, end;
           if (typeof event.start === 'object' && event.start.year) {
-             start = new Date(event.start.year, event.start.month, event.start.day, event.start.hour, event.start.minute);
+            start = new Date(event.start.year, event.start.month, event.start.day, event.start.hour, event.start.minute);
           } else {
-             start = new Date(event.start);
+            start = new Date(event.start);
           }
-           
+
           if (typeof event.end === 'object' && event.end.year) {
-             end = new Date(event.end.year, event.end.month, event.end.day, event.end.hour, event.end.minute);
+            end = new Date(event.end.year, event.end.month, event.end.day, event.end.hour, event.end.minute);
           } else {
-             end = new Date(event.end);
+            end = new Date(event.end);
           }
 
           return {
@@ -50,13 +77,13 @@ export function StudyPlanner() {
             start: start,
             end: end,
             extendedProps: {
-               type: event.type,
-               completed: event.completed,
-               topic: event.topic,
-               description: event.description
+              type: event.type,
+              completed: event.completed,
+              topic: event.topic,
+              description: event.description
             },
             // Props for basic FullCalendar rendering if customContent fails
-            backgroundColor: event.type === 'exam' ? '#EF4444' : '#6C63FF', 
+            backgroundColor: event.type === 'exam' ? '#EF4444' : '#6C63FF',
             borderColor: 'transparent',
             textColor: '#FFFFFF'
           };
@@ -69,7 +96,7 @@ export function StudyPlanner() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPlanId]);
 
   useEffect(() => {
     fetchEvents();
@@ -78,7 +105,7 @@ export function StudyPlanner() {
   const handleEventClick = (info: any) => {
     const event = info.event;
     const props = event.extendedProps;
-    
+
     setSelectedEvent({
       id: event.id,
       title: event.title,
@@ -93,14 +120,14 @@ export function StudyPlanner() {
 
   const toggleEventStatus = async () => {
     if (!selectedEvent) return;
-    
+
     const newCompleted = !selectedEvent.completed;
-    
+
     // Optimistic Update Local State
     setSelectedEvent((prev: any) => ({ ...prev, completed: newCompleted }));
-    setEvents(prev => prev.map(e => e.id === selectedEvent.id ? { 
-      ...e, 
-      extendedProps: { ...e.extendedProps, completed: newCompleted } 
+    setEvents(prev => prev.map(e => e.id === selectedEvent.id ? {
+      ...e,
+      extendedProps: { ...e.extendedProps, completed: newCompleted }
     } : e));
 
     try {
@@ -109,9 +136,9 @@ export function StudyPlanner() {
       console.error('Failed to update event');
       // Revert on failure
       setSelectedEvent((prev: any) => ({ ...prev, completed: !newCompleted }));
-      setEvents(prev => prev.map(e => e.id === selectedEvent.id ? { 
-        ...e, 
-        extendedProps: { ...e.extendedProps, completed: !newCompleted } 
+      setEvents(prev => prev.map(e => e.id === selectedEvent.id ? {
+        ...e,
+        extendedProps: { ...e.extendedProps, completed: !newCompleted }
       } : e));
     }
   };
@@ -128,7 +155,7 @@ export function StudyPlanner() {
         isCompleted && "opacity-60 grayscale-[0.5]"
       )}>
         <div className="flex items-start justify-between min-w-0">
-           <span className={cn(
+          <span className={cn(
             "text-xs font-bold leading-tight break-words pr-1",
             isExam ? "text-red-300" : "text-cyan-300",
             isCompleted && "line-through text-gray-500"
@@ -150,7 +177,7 @@ export function StudyPlanner() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-6rem)] flex flex-col">
-       <div className="flex justify-between items-center mb-6 shrink-0">
+      <div className="flex justify-between items-center mb-6 shrink-0">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <CalendarIcon className="w-8 h-8 text-highlight-cyan" />
@@ -161,11 +188,14 @@ export function StudyPlanner() {
           </p>
         </div>
         <div className="flex gap-3">
-           <Link to="/upload">
+          <Link to="/upload">
             <Button variant="outline" size="sm" className="gap-2">
               <Upload className="w-4 h-4" /> New Plan
             </Button>
           </Link>
+          <Button variant="outline" size="sm" onClick={handleViewHistory} className="gap-2">
+            <History className="w-4 h-4" /> History
+          </Button>
           <Button variant="neon" size="sm" onClick={fetchEvents} disabled={loading} className="gap-2">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Sync
@@ -173,20 +203,20 @@ export function StudyPlanner() {
         </div>
       </div>
 
-       {error && events.length === 0 && (
-         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm animate-fade-in">
-           Unable to sync calendar: {error}
-         </div>
+      {error && events.length === 0 && (
+        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm animate-fade-in">
+          Unable to sync calendar: {error}
+        </div>
       )}
 
       <Card className="flex-1 bg-cosmic-blue/20 border-white/10 p-4 overflow-hidden backdrop-blur-md relative shadow-2xl shadow-space-black/50 full-calendar-wrapper">
-         {loading && events.length === 0 ? (
+        {loading && events.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center bg-space-black/50 z-10">
             <Loader2 className="w-10 h-10 text-nebula-purple animate-spin" />
           </div>
         ) : events.length === 0 && !loading && !error ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-fade-in">
-             <div className="w-24 h-24 bg-nebula-purple/10 rounded-full flex items-center justify-center mb-6 border border-nebula-purple/20">
+            <div className="w-24 h-24 bg-nebula-purple/10 rounded-full flex items-center justify-center mb-6 border border-nebula-purple/20">
               <BookOpen className="w-12 h-12 text-nebula-purple" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-3">Your Schedule is Empty</h2>
@@ -229,8 +259,8 @@ export function StudyPlanner() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <Card className="bg-[#0f1115] border border-white/10 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
             <div className={cn(
-               "p-6 border-b",
-               selectedEvent.type === 'exam' ? "bg-red-500/10 border-red-500/20" : "bg-nebula-purple/5 border-white/5"
+              "p-6 border-b",
+              selectedEvent.type === 'exam' ? "bg-red-500/10 border-red-500/20" : "bg-nebula-purple/5 border-white/5"
             )}>
               <div className="flex justify-between items-start gap-4">
                 <h3 className={cn(
@@ -239,7 +269,7 @@ export function StudyPlanner() {
                 )}>
                   {selectedEvent.title}
                 </h3>
-                <button 
+                <button
                   onClick={() => setSelectedEvent(null)}
                   className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-lg"
                 >
@@ -256,37 +286,37 @@ export function StudyPlanner() {
 
             <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar">
               {selectedEvent.topic && (
-                 <div className="space-y-2">
-                   <div className="flex items-center gap-2 text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                     <BookOpen className="w-4 h-4 text-highlight-cyan" />
-                     Topic
-                   </div>
-                   <p className="text-gray-300 bg-white/5 p-3 rounded-lg border border-white/5">
-                     {selectedEvent.topic}
-                   </p>
-                 </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                    <BookOpen className="w-4 h-4 text-highlight-cyan" />
+                    Topic
+                  </div>
+                  <p className="text-gray-300 bg-white/5 p-3 rounded-lg border border-white/5">
+                    {selectedEvent.topic}
+                  </p>
+                </div>
               )}
 
               {selectedEvent.description && (
-                 <div className="space-y-2">
-                   <div className="flex items-center gap-2 text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                     <AlignLeft className="w-4 h-4 text-highlight-cyan" />
-                     Description
-                   </div>
-                   <p className="text-gray-400 leading-relaxed">
-                     {selectedEvent.description}
-                   </p>
-                 </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                    <AlignLeft className="w-4 h-4 text-highlight-cyan" />
+                    Description
+                  </div>
+                  <p className="text-gray-400 leading-relaxed">
+                    {selectedEvent.description}
+                  </p>
+                </div>
               )}
 
               <div className="pt-4 flex justify-end">
-                <Button 
-                   variant={selectedEvent.completed ? "outline" : "neon"} 
-                   className={cn(
-                     "w-full sm:w-auto gap-2 transition-all duration-300",
-                     selectedEvent.completed && "border-green-500 text-green-500 hover:bg-green-500/10 hover:text-green-400"
-                   )}
-                   onClick={toggleEventStatus}
+                <Button
+                  variant={selectedEvent.completed ? "outline" : "neon"}
+                  className={cn(
+                    "w-full sm:w-auto gap-2 transition-all duration-300",
+                    selectedEvent.completed && "border-green-500 text-green-500 hover:bg-green-500/10 hover:text-green-400"
+                  )}
+                  onClick={toggleEventStatus}
                 >
                   {selectedEvent.completed ? (
                     <>
@@ -301,6 +331,83 @@ export function StudyPlanner() {
                   )}
                 </Button>
               </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+
+      {/* History Modal */}
+      {historyOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <Card className="bg-[#0f1115] border border-white/10 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <History className="w-5 h-5 text-highlight-cyan" /> Upload History
+              </h3>
+              <button onClick={() => setHistoryOpen(false)} className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[#151720]">
+              {historyLoading ? (
+                <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 text-nebula-purple animate-spin" /></div>
+              ) : studyPlans.length === 0 ? (
+                <div className="text-center py-10">
+                  <FolderOpen className="w-12 h-12 text-gray-500 mx-auto mb-3 opacity-50" />
+                  <p className="text-gray-400">No plan history found.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {studyPlans.map(plan => (
+                    <div
+                      key={plan._id}
+                      onClick={() => handleLoadPlan(plan._id)}
+                      className={cn(
+                        "bg-space-black/40 border rounded-xl p-4 transition-all group cursor-pointer relative overflow-hidden",
+                        currentPlanId === plan._id
+                          ? "border-highlight-cyan bg-highlight-cyan/5"
+                          : "border-white/5 hover:border-white/20 hover:bg-white/5"
+                      )}
+                    >
+                      {currentPlanId === plan._id && (
+                        <div className="absolute top-0 right-0 p-2">
+                          <div className="bg-highlight-cyan text-black text-[10px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider">
+                            Active
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className={cn(
+                            "font-bold text-lg transition-colors",
+                            currentPlanId === plan._id ? "text-highlight-cyan" : "text-gray-200 group-hover:text-highlight-cyan"
+                          )}>
+                            {plan.title || "Untitled Plan"}
+                          </h4>
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Created on {format(new Date(plan.createdAt), 'MMMM do, yyyy')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                          <span className="block text-xl font-bold text-white">{plan.subjectCount}</span>
+                          <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Subjects</span>
+                        </div>
+                        <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                          <span className="block text-xl font-bold text-white">{plan.topicCount}</span>
+                          <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Topics</span>
+                        </div>
+                        <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                          <span className={cn("block text-xl font-bold", plan.readiness > 70 ? "text-green-400" : "text-yellow-400")}>{Math.round(plan.readiness)}%</span>
+                          <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Readiness</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </Card>
         </div>

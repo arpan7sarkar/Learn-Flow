@@ -1,4 +1,15 @@
 import { getModel } from './model.js';
+import { generateContentWithRetry } from './utils.js';
+
+/**
+ * Generate study plan using AI
+ * @param {Array} subjects - Array of subjects with topics
+ * @param {Date} examDate - Target exam date
+ * @param {number} hoursPerDay - Available study hours per day
+ * @returns {Promise<Object>} - AI-optimized study plan
+ */
+
+
 
 /**
  * Generate study plan using AI
@@ -51,7 +62,7 @@ Rules:
 5. Response must be valid JSON only`;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await generateContentWithRetry(model, prompt);
     const response = await result.response;
     const text = response.text();
 
@@ -81,7 +92,7 @@ const generateBasicPlan = (subjects, examDate, hoursPerDay) => {
   let bufferDays = 2;
   if (daysUntilExam <= 2) bufferDays = 0;
   else if (daysUntilExam <= 5) bufferDays = 1;
-  
+
   const studyDays = Math.max(daysUntilExam - bufferDays, 1);
 
   let allTopics = [];

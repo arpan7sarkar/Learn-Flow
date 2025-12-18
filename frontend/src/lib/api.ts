@@ -50,6 +50,14 @@ export async function getStudyPlan(planId: string) {
   return fetchAPI(`/study-plan/${planId}`);
 }
 
+/**
+ * Get all study plans (history)
+ */
+export async function getAllStudyPlans(userId?: string) {
+  const params = userId ? `?userId=${userId}` : '';
+  return fetchAPI(`/all-study-plans${params}`);
+}
+
 // ==================== Planner APIs ====================
 
 /**
@@ -65,11 +73,12 @@ export async function generateStudyPlan(studyPlanId: string, hoursPerDay = 4, ex
 /**
  * Get calendar events
  */
-export async function getStudyCalendar(userId?: string, startDate?: string, endDate?: string) {
+export async function getStudyCalendar(userId?: string, startDate?: string, endDate?: string, studyPlanId?: string) {
   const params = new URLSearchParams();
   if (userId) params.append('userId', userId);
   if (startDate) params.append('startDate', startDate);
   if (endDate) params.append('endDate', endDate);
+  if (studyPlanId) params.append('studyPlanId', studyPlanId);
 
   const queryString = params.toString();
   return fetchAPI(`/study-calendar${queryString ? `?${queryString}` : ''}`);
@@ -90,10 +99,10 @@ export async function updateCalendarEvent(eventId: string, completed: boolean) {
 /**
  * Get AI explanation for a topic
  */
-export async function explainTopic(topic: string, analogy: string = 'reallife') {
+export async function explainTopic(topic: string, analogy: string = 'reallife', sessionId?: string) {
   return fetchAPI('/ai-explain-topic', {
     method: 'POST',
-    body: JSON.stringify({ topic, analogy }),
+    body: JSON.stringify({ topic, analogy, sessionId }),
   });
 }
 
@@ -124,11 +133,29 @@ export async function getQuizHistory(userId?: string) {
   const params = userId ? `?userId=${userId}` : '';
   return fetchAPI(`/quiz-history${params}`);
 }/**
- * Get chat history
+ * Get chat sessions list
  */
-export async function getChatHistory(userId?: string) {
+export async function getChatSessions(userId?: string) {
   const params = userId ? `?userId=${userId}` : '';
   return fetchAPI(`/chat-history${params}`);
+}
+
+/**
+ * Get specific chat session
+ */
+export async function getChatSession(sessionId: string, userId?: string) {
+  const params = userId ? `?userId=${userId}` : '';
+  return fetchAPI(`/chat-session/${sessionId}${params}`);
+}
+
+/**
+ * Delete chat session
+ */
+export async function deleteChatSession(sessionId: string, userId?: string) {
+  const params = userId ? `?userId=${userId}` : '';
+  return fetchAPI(`/chat-session/${sessionId}${params}`, {
+    method: 'DELETE',
+  });
 }
 
 // ==================== Health Check ====================
@@ -147,6 +174,7 @@ export default {
   generateQuiz,
   submitQuiz,
   getQuizHistory,
-  getChatHistory,
+  getChatSessions,
+  getChatSession,
   healthCheck,
 };

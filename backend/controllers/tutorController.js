@@ -11,7 +11,7 @@ import ChatHistory from '../models/ChatHistory.js';
 
 export const explainTopic = async (req, res) => {
   try {
-    const { topic, analogy = 'reallife', userId } = req.body;
+    const { topic, analogy = 'reallife', userId, sessionId } = req.body;
 
     if (!topic) {
       return res.status(400).json({ error: 'Topic is required' });
@@ -23,16 +23,24 @@ export const explainTopic = async (req, res) => {
       user = await User.findById(userId);
     } else {
       user = await User.findOne({ email: 'demo@learnflow.com' });
-      // Create demo user if not exists (for consistency)
       if (!user) {
         user = await User.create({ email: 'demo@learnflow.com', name: 'Demo User' });
       }
     }
 
-    // Get or create chat history
-    let chat = await ChatHistory.findOne({ userId: user._id });
+    // Get or create chat session
+    let chat;
+    if (sessionId) {
+      chat = await ChatHistory.findOne({ _id: sessionId, userId: user._id });
+    }
+
+    // Create new session if no ID provided or session not found
     if (!chat) {
-      chat = await ChatHistory.create({ userId: user._id, messages: [] });
+      chat = await ChatHistory.create({
+        userId: user._id,
+        topic: topic,
+        messages: []
+      });
     }
 
     const userMessage = `Explain ${topic} using ${analogy} analogy`;
@@ -42,14 +50,21 @@ export const explainTopic = async (req, res) => {
 
     // AI Response Content construction
     const aiContent = `${explanation.simpleExplanation}\n\n${explanation.analogyExplanation}`;
-    chat.messages.push({ role: 'model', content: aiContent });
-    
+
+    // Save message WITH keyPoints for persistence
+    chat.messages.push({
+      role: 'model',
+      content: aiContent,
+      keyPoints: explanation.keyPoints || []
+    });
+
     chat.lastUpdated = Date.now();
     await chat.save();
 
     res.json({
       success: true,
       data: {
+        sessionId: chat._id,
         topic,
         analogy,
         ...explanation
@@ -190,7 +205,41 @@ export const getChatHistory = async (req, res) => {
       return res.status(400).json({ error: 'User not found' });
     }
 
-    const chat = await ChatHistory.findOne({ userId: user._id });
+    // Return list of sessions (id, topic, date) for sidebar
+    const chatSessions = await ChatHistory.find({ userId: user._id })
+      .sort({ lastUpdated: -1 })
+      .select('_id topic lastUpdated');
+
+    res.json({
+      success: true,
+      data: chatSessions
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get specific chat session
+ * GET /api/chat-session/:sessionId
+ */
+export const getChatSession = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { userId } = req.query;
+
+    let user;
+    if (userId) {
+      user = await User.findById(userId);
+    } else {
+      user = await User.findOne({ email: 'demo@learnflow.com' });
+    }
+
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+
+    const chat = await ChatHistory.findOne({ _id: sessionId, userId: user._id });
 
     res.json({
       success: true,
@@ -201,4 +250,36 @@ export const getChatHistory = async (req, res) => {
   }
 };
 
-export default { explainTopic, createQuiz, submitQuiz, getQuizHistory, getChatHistory };
+/**
+ * Delete chat session
+ * DELETE /api/chat-session/:sessionId
+ */
+export const deleteChatSession = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { userId } = req.query;
+
+    let user;
+    if (userId) {
+      user = await User.findById(userId);
+    } else {
+      user = await User.findOne({ email: 'demo@learnflow.com' });
+    }
+
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+
+    const result = await ChatHistory.deleteOne({ _id: sessionId, userId: user._id });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Session not found or unauthorized' });
+    }
+
+    res.json({ success: true, message: 'Session deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export default { explainTopic, createQuiz, submitQuiz, getQuizHistory, getChatHistory, getChatSession, deleteChatSession };

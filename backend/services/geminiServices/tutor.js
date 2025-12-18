@@ -1,4 +1,5 @@
 import { getModel } from './model.js';
+import { generateContentWithRetry } from './utils.js';
 
 /**
  * Explain topic with analogy
@@ -6,6 +7,9 @@ import { getModel } from './model.js';
  * @param {string} analogy - Analogy style (marvel, cricket, etc.)
  * @returns {Promise<Object>} - Explanation with analogy
  */
+
+
+
 export const explainTopicWithAnalogy = async (topic, analogy = "reallife") => {
   const model = getModel();
 
@@ -20,27 +24,33 @@ export const explainTopicWithAnalogy = async (topic, analogy = "reallife") => {
   const prompt = `You are an expert tutor who explains complex topics using fun analogies.
 
 TOPIC: ${topic}
-ANALOGY STYLE: ${analogyContexts[analogy] || analogyContexts.reallife}
+ANALOGY STYLE: ${analogyContexts[analogy] || (analogy === 'Custom' ? "Use a creative and relevant analogy that fits the topic well" : analogyContexts.reallife)}
+
+IMPORTANT: Keep the explanation concise and focused. Do not be overly verbose.
 
 Provide a response in this JSON format:
 {
-  "simpleExplanation": "A clear 2-3 sentence explanation for beginners",
-  "analogyExplanation": "A detailed explanation using the ${analogy} analogy (3-4 paragraphs)",
+  "simpleExplanation": "A clear, concise explanation for beginners (2-3 sentences max)",
+  "analogyExplanation": "The explanation using the requested analogy (keep it focused, max 3 paragraphs)",
   "keyPoints": ["point 1", "point 2", "point 3"],
   "commonMistakes": ["mistake 1", "mistake 2"],
   "relatedTopics": ["topic 1", "topic 2"]
 }
 
-Make it engaging, memorable, and educational. Response must be valid JSON only.`;
+Make it engaging, memorable, and educational.
+
+Rules for formatting:
+1. Response must be valid JSON only
+2. IMPORTANT: Wrap ALL mathematical formulas in dollar signs ($) for LaTeX rendering (e.g., use "$\\\\frac{1}{2}$", not "\\frac{1}{2}" or "1/2").
+3. IMPORTANT: You MUST double-escape all backslashes (e.g., use "$\\\\psi$" instead of "$\\psi$").`;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await generateContentWithRetry(model, prompt);
     const response = await result.response;
     const text = response.text();
 
-    let cleanText = text.replace(/```json/g, '').replace(/```/g, '');
-    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }

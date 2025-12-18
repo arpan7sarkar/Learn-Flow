@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import { CheckCircle, FileText, UploadCloud, Calendar, Loader2 } from "lucide-react";
-import { Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 import { uploadSyllabus, generateStudyPlan } from "../lib/api";
 
 export function SyllabusUpload() {
- // const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -18,6 +18,7 @@ export function SyllabusUpload() {
   const [timeline, setTimeline] = useState('7-days');
   const [customAmount, setCustomAmount] = useState('3');
   const [customUnit, setCustomUnit] = useState('days');
+  const [planName, setPlanName] = useState('');
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -61,7 +62,7 @@ export function SyllabusUpload() {
     try {
       // Upload syllabus
       setProgress(30);
-      const uploadResult = await uploadSyllabus(file);
+      const uploadResult = await uploadSyllabus(file, planName || undefined);
       setProgress(60);
 
       if (uploadResult.success) {
@@ -128,6 +129,17 @@ export function SyllabusUpload() {
               onDragOver={handleDrag}
               onDrop={handleDrop}
             >
+              <div className="mb-6 w-full max-w-md">
+                <input
+                  type="text"
+                  placeholder="Plan Name (optional)"
+                  value={planName}
+                  onChange={(e) => setPlanName(e.target.value)}
+                  className="w-full bg-space-black border border-gray-700 rounded px-4 py-2 text-white text-sm focus:border-nebula-purple outline-none mb-4"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+
               <input
                 type="file"
                 className="hidden"

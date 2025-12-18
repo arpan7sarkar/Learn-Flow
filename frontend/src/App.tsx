@@ -5,10 +5,12 @@ import { Dashboard } from "./pages/Dashboard";
 import { SyllabusUpload } from "./pages/SyllabusUpload";
 import { StudyPlanner } from "./pages/StudyPlanner";
 import { AITutor } from "./pages/AITutor";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
