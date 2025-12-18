@@ -1,4 +1,4 @@
-import { Bot, Calendar, Cpu, LineChart, LayoutDashboard, Zap, Sparkles, Brain } from "lucide-react";
+import { Bot, Calendar, Cpu, LineChart, LayoutDashboard, Zap, Brain } from "lucide-react";
 import { cn } from "../lib/utils";
 
 const features = [

@@ -90,7 +90,7 @@ export function Dashboard() {
           <div className="bg-brand-dark border border-brand-gray rounded-3xl p-6 flex flex-col justify-between h-48 group hover:border-brand-text-muted/20 transition-colors">
              <div className="flex justify-between items-start">
                <div className="p-3 bg-brand-gray/50 rounded-2xl">
-                 <Trophy className="text-yellow-400 w-6 h-6" />
+                 <Trophy className="text-white w-6 h-6" />
                </div>
                <span className="text-xs font-mono text-brand-text-muted bg-brand-black px-2 py-1 rounded-md">STREAK</span>
              </div>
@@ -104,7 +104,7 @@ export function Dashboard() {
           <div className="bg-brand-dark border border-brand-gray rounded-3xl p-6 flex flex-col justify-between h-48 group hover:border-brand-text-muted/20 transition-colors">
              <div className="flex justify-between items-start">
                <div className="p-3 bg-brand-gray/50 rounded-2xl">
-                 <CheckCircle className="text-green-400 w-6 h-6" />
+                 <CheckCircle className="text-white w-6 h-6" />
                </div>
                <span className="text-xs font-mono text-brand-text-muted bg-brand-black px-2 py-1 rounded-md">DONE</span>
              </div>
@@ -118,7 +118,7 @@ export function Dashboard() {
            <div className="bg-brand-dark border border-brand-gray rounded-3xl p-6 flex flex-col justify-between h-48 group hover:border-brand-text-muted/20 transition-colors">
              <div className="flex justify-between items-start">
                <div className="p-3 bg-brand-gray/50 rounded-2xl">
-                 <Clock className="text-blue-400 w-6 h-6" />
+                 <Clock className="text-white w-6 h-6" />
                </div>
                <span className="text-xs font-mono text-brand-text-muted bg-brand-black px-2 py-1 rounded-md">TIME</span>
              </div>
@@ -134,10 +134,10 @@ export function Dashboard() {
                <ArrowUpRight className="w-5 h-5 text-brand-text-muted" />
              </div>
              <div className="p-3 bg-brand-gray/50 rounded-2xl w-fit">
-               <BookOpen className="text-purple-400 w-6 h-6" />
+               <BookOpen className="text-white w-6 h-6" />
              </div>
              <div>
-               <div className="text-xl font-bold mb-1 group-hover:text-purple-300 transition-colors">AI Tutor</div>
+               <div className="text-xl font-bold mb-1 group-hover:text-white transition-colors">AI Tutor</div>
                <div className="text-sm text-brand-text-muted">Get help now</div>
              </div>
           </Link>
