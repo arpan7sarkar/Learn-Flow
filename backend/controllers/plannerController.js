@@ -194,4 +194,157 @@ export const clearCalendar = async (req, res) => {
   }
 };
 
-export default { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar, getStudyPlan };
+/**
+ * Get all study plans for a user (History)
+ * GET /api/all-study-plans
+ */
+export const getAllStudyPlans = async (req, res) => {
+  try {
+    const User = (await import('../models/User.js')).default;
+    // In real app, get userId from auth middleware. For now use demo or query param
+    let userId = req.query.userId;
+
+    if (!userId) {
+      const demoUser = await User.findOne({ email: 'demo@learnflow.com' });
+      if (demoUser) userId = demoUser._id;
+    }
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User not identified' });
+    }
+
+    const plans = await StudyPlan.find({ userId })
+      .select('title subjects examDate createdAt hoursPerDay estimatedReadiness')
+      .sort({ createdAt: -1 });
+
+    // Add computed field for total topics
+    const formattedPlans = plans.map(p => ({
+      _id: p._id,
+      title: p.title,
+      examDate: p.examDate,
+      createdAt: p.createdAt,
+      subjectCount: p.subjects?.length || 0,
+      topicCount: p.subjects?.reduce((acc, s) => acc + s.topics.length, 0) || 0,
+      readiness: p.estimatedReadiness || 0
+    }));
+
+    res.json({
+      success: true,
+      count: formattedPlans.length,
+      data: formattedPlans
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get study analytics with AI insights
+ * GET /api/study-analytics
+ */
+export const getStudyAnalytics = async (req, res) => {
+  try {
+    const User = (await import('../models/User.js')).default;
+    // In real app, get userId from auth middleware. For now use demo or query param
+    let userId = req.query.userId;
+
+    if (!userId) {
+      const demoUser = await User.findOne({ email: 'demo@learnflow.com' });
+      if (demoUser) userId = demoUser._id;
+    }
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User not identified' });
+    }
+
+    // Get all calendar events
+    const events = await CalendarEvent.find({ userId });
+
+    // Get latest study plan for context (subjects)
+    const latestPlan = await StudyPlan.findOne({ userId }).sort({ createdAt: -1 });
+    const subjects = latestPlan ? latestPlan.subjects : [];
+
+    // 1. Calculate Statistics
+    const totalSessions = events.length;
+    const completedSessions = events.filter(e => e.completed).length;
+    const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+
+    // Approx hours (assuming 1 hour per session if not specified, or diff)
+    // For simplicity, we'll assume 1 hour per session event for now
+    const totalHours = completedSessions;
+
+    // Topic Distribution
+    const topicDistribution = {};
+    events.forEach(e => {
+      if (e.topic) {
+        topicDistribution[e.topic] = (topicDistribution[e.topic] || 0) + 1;
+      }
+    });
+
+    // Calculate Streak
+    // Sort completed events by date
+    const completedEvents = events
+      .filter(e => e.completed)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    let currentStreak = 0;
+    if (completedEvents.length > 0) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Check if studied today
+      const lastStudyDate = new Date(completedEvents[completedEvents.length - 1].date);
+      lastStudyDate.setHours(0, 0, 0, 0);
+
+      const diffDays = (today.getTime() - lastStudyDate.getTime()) / (1000 * 3600 * 24);
+
+      if (diffDays <= 1) {
+        currentStreak = 1;
+        // Walk backwards
+        for (let i = completedEvents.length - 2; i >= 0; i--) {
+          const curr = new Date(completedEvents[i].date);
+          const prev = new Date(completedEvents[i + 1].date);
+          curr.setHours(0, 0, 0, 0);
+          prev.setHours(0, 0, 0, 0);
+
+          const gap = (prev.getTime() - curr.getTime()) / (1000 * 3600 * 24);
+          if (gap === 1) {
+            currentStreak++;
+          } else if (gap === 0) {
+            // Same day, continue
+            continue;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    const stats = {
+      totalSessions,
+      completedSessions,
+      completionRate,
+      totalHours,
+      currentStreak,
+      topicDistribution
+    };
+
+    // 2. Generate AI Analysis
+    const { analyzeStudyProgress } = await import('../services/geminiServices/analysis.js');
+    const aiAnalysis = await analyzeStudyProgress(stats, subjects);
+
+    res.json({
+      success: true,
+      data: {
+        stats,
+        analysis: aiAnalysis
+      }
+    });
+
+  } catch (error) {
+    console.error("Analytics Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export default { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar, getStudyPlan, getAllStudyPlans, getStudyAnalytics };

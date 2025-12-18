@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar } from '../controllers/plannerController.js';
+import { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar, getAllStudyPlans, getStudyAnalytics } from '../controllers/plannerController.js';
 
 const router = express.Router();
 
@@ -17,5 +17,11 @@ router.get('/study-plan/:id', (await import('../controllers/plannerController.js
 
 // Clear calendar (for testing/reset)
 router.delete('/clear-calendar', clearCalendar);
+
+// Get all study plans (History)
+router.get('/all-study-plans', getAllStudyPlans);
+
+// Get study analytics
+router.get('/study-analytics', getStudyAnalytics);
 
 export default router;

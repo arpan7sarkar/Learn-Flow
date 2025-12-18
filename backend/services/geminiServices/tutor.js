@@ -24,12 +24,14 @@ export const explainTopicWithAnalogy = async (topic, analogy = "reallife") => {
   const prompt = `You are an expert tutor who explains complex topics using fun analogies.
 
 TOPIC: ${topic}
-ANALOGY STYLE: ${analogyContexts[analogy] || analogyContexts.reallife}
+ANALOGY STYLE: ${analogyContexts[analogy] || (analogy === 'Custom' ? "Use a creative and relevant analogy that fits the topic well" : analogyContexts.reallife)}
+
+IMPORTANT: Keep the explanation concise and focused. Do not be overly verbose.
 
 Provide a response in this JSON format:
 {
-  "simpleExplanation": "A clear 2-3 sentence explanation for beginners",
-  "analogyExplanation": "A detailed explanation using the ${analogy} analogy (3-4 paragraphs)",
+  "simpleExplanation": "A clear, concise explanation for beginners (2-3 sentences max)",
+  "analogyExplanation": "The explanation using the requested analogy (keep it focused, max 3 paragraphs)",
   "keyPoints": ["point 1", "point 2", "point 3"],
   "commonMistakes": ["mistake 1", "mistake 2"],
   "relatedTopics": ["topic 1", "topic 2"]
