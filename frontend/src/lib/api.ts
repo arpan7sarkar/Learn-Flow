@@ -132,7 +132,17 @@ export async function submitQuiz(topic: string, answers: any[]) {
 export async function getQuizHistory(userId?: string) {
   const params = userId ? `?userId=${userId}` : '';
   return fetchAPI(`/quiz-history${params}`);
-}/**
+}
+
+/**
+ * Get study analytics (stats, streaks, progress)
+ */
+export async function getStudyAnalytics(userId?: string) {
+  const params = userId ? `?userId=${userId}` : '';
+  return fetchAPI(`/study-analytics${params}`);
+}
+
+/**
  * Get chat sessions list
  */
 export async function getChatSessions(userId?: string) {
@@ -174,7 +184,9 @@ export default {
   generateQuiz,
   submitQuiz,
   getQuizHistory,
+  getStudyAnalytics,
   getChatSessions,
   getChatSession,
   healthCheck,
 };
+

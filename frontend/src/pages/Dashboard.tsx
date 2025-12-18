@@ -2,7 +2,7 @@ import { Button } from "../components/ui/Button";
 import { Link } from "react-router-dom";
 import { BookOpen, Calendar, CheckCircle, Clock, Trophy, Upload, Loader2, MoreHorizontal, ArrowUpRight } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getStudyCalendar, getQuizHistory } from "../lib/api";
+import { getStudyCalendar, getStudyAnalytics } from "../lib/api";
 import { cn } from "../lib/utils";
 
 export function Dashboard() {
@@ -18,46 +18,35 @@ export function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch study analytics for stats
+        const analyticsRes = await getStudyAnalytics();
+        if (analyticsRes.success && analyticsRes.data) {
+          const { stats: analyticsStats } = analyticsRes.data;
+          setStats({
+            topicsMastered: Object.keys(analyticsStats.topicDistribution || {}).length,
+            studyHours: analyticsStats.totalHours || 0,
+            tasksCompleted: analyticsStats.completedSessions || 0,
+            streak: analyticsStats.currentStreak || 0
+          });
+        }
+
+        // Fetch calendar events for upcoming tasks
         const calendarRes = await getStudyCalendar();
         if (calendarRes.success && calendarRes.data) {
           const events = calendarRes.data.slice(0, 5);
           setUpcomingTasks(events.map((e: any) => ({
             title: e.topic || e.title,
-            date: new Date(e.start || e.date).toLocaleString('en-US', {
+            date: new Date(e.start?.year, e.start?.month, e.start?.day, e.start?.hour, e.start?.minute).toLocaleString('en-US', {
               weekday: 'short',
               hour: '2-digit',
               minute: '2-digit'
             }),
             type: e.type || 'Study'
           })));
-
-          const completed = calendarRes.data.filter((e: any) => e.completed).length;
-          setStats(prev => ({
-            ...prev,
-            tasksCompleted: completed,
-            topicsMastered: Math.floor(completed / 3)
-          }));
-        }
-
-        const quizRes = await getQuizHistory();
-        if (quizRes.success && quizRes.data) {
-          setStats(prev => ({
-            ...prev,
-            streak: quizRes.data.length > 0 ? Math.min(quizRes.data.length, 7) : 0
-          }));
         }
       } catch (err) {
-        setUpcomingTasks([
-          { title: "Quantum Physics Basics", date: "Today, 2:00 PM", type: "Study" },
-          { title: "Organic Chemistry Quiz", date: "Tomorrow, 10:00 AM", type: "Exam" },
-          { title: "Calculus Limits", date: "Wed, 4:00 PM", type: "Review" },
-        ]);
-        setStats({
-          topicsMastered: 12,
-          studyHours: 45,
-          tasksCompleted: 28,
-          streak: 5
-        });
+        // Show zeros when no data - no fake fallback data
+        console.log('Dashboard data fetch error:', err);
       } finally {
         setLoading(false);
       }
