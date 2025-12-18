@@ -2,8 +2,29 @@ import { Button } from "../components/ui/Button";
 import { Link } from "react-router-dom";
 import { Features } from "./Features";
 import { ChevronRight, Rocket } from "lucide-react";
+import { motion, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
+import type { MouseEvent } from "react";
 
 export function LandingPage() {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 25, stiffness: 150, mass: 0.5 }; // Smooth physics
+  const springX = useSpring(mouseX, springConfig);
+  const springY = useSpring(mouseY, springConfig);
+
+  const background = useMotionTemplate`radial-gradient(
+    600px circle at ${springX}px ${springY}px,
+    rgba(255, 255, 255, 0.04),
+    transparent 80%
+  )`;
+
+  function handleMouseMove({ clientX, clientY, currentTarget }: MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
   const scrollToFeatures = () => {
     const element = document.getElementById('features');
     if (element) {
@@ -12,12 +33,20 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-gray-200 pt-24 font-inter selection:bg-white/20">
+    <div 
+      className="min-h-screen bg-[#050505] text-gray-200 pt-24 font-inter selection:bg-white/20 relative group"
+      onMouseMove={handleMouseMove}
+    >
+      {/* Interactive Cursor Gradient */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-300 group-hover:opacity-100 opacity-50"
+        style={{ background }}
+      />
       
       {/* Hero Section */}
-      <section className="relative px-6 pt-20 pb-32 text-center max-w-5xl mx-auto overflow-hidden">
-        {/* Ambient Background Glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-white/[0.03] blur-[120px] rounded-full pointing-events-none" />
+      <section className="relative px-6 pt-20 pb-32 text-center max-w-5xl mx-auto overflow-hidden z-10">
+        {/* Ambient Background Glows (Static) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-white/[0.02] blur-[120px] rounded-full pointing-events-none" />
         <div className="absolute bottom-0 left-1/4 w-[400px] h-[300px] bg-zinc-800/[0.05] blur-[100px] rounded-full pointing-events-none" />
 
         <div className="relative z-10 flex flex-col items-center">
