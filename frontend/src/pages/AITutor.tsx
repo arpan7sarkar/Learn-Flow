@@ -296,16 +296,16 @@ export function AITutor() {
       {/* Quiz Modal Overlay */}
       {quiz && quiz.length > 0 && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <Card className="w-full max-w-7xl bg-cosmic-blue border-white/20 shadow-2xl max-h-[90vh] flex flex-col">
-            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-space-black/30">
-              <h4 className="text-xl font-bold text-yellow-400 flex items-center gap-2">
+          <Card className="w-full max-w-7xl bg-brand-black border-brand-gray shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-brand-gray flex justify-between items-center bg-brand-dark">
+              <h4 className="text-xl font-bold text-white flex items-center gap-2">
                 <Trophy className="w-6 h-6" /> Quick Quiz
               </h4>
               <button onClick={() => setQuiz(null)} className="p-1 hover:bg-white/10 rounded-full">
                 <XCircle className="w-6 h-6 text-gray-400 hover:text-white" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-brand-black">
               {/* Quiz Result Summary */}
               {quizResult && (
                 <div className={cn("p-4 rounded-xl border mb-6 animate-in slide-in-from-top-2", quizResult.passed ? "bg-green-500/20 border-green-500/50 text-green-200" : "bg-red-500/20 border-red-500/50 text-red-200")}>
@@ -332,7 +332,7 @@ export function AITutor() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {q.options.map((opt, j) => {
-                      let btnClass = "bg-space-black/50 border-white/10 text-gray-300 hover:border-white/30 hover:bg-white/5";
+                      let btnClass = "bg-brand-dark border-brand-gray text-gray-300 hover:border-white/30 hover:bg-white/5";
                       const match = opt.match(/^([A-Da-d])[\)\.]/);
                       const optLetter = match ? match[1].toUpperCase() : "";
                       const isCorrectOption = optLetter === q.correctAnswer;
@@ -343,7 +343,7 @@ export function AITutor() {
                         else if (isSelected) btnClass = "bg-red-500/10 border-red-500/40 text-red-300 opacity-80";
                         else btnClass = "opacity-40 grayscale";
                       } else if (isSelected) {
-                        btnClass = "bg-yellow-500/20 border-yellow-400 text-yellow-200";
+                        btnClass = "bg-white/10 border-white text-white";
                       }
 
                       return (
@@ -365,20 +365,20 @@ export function AITutor() {
               ))}
             </div>
             {!quizSubmitted && (
-              <div className="p-4 border-t border-white/10 bg-space-black/30 flex justify-end">
-                <Button variant="neon" onClick={handleSubmitQuiz} disabled={Object.keys(quizAnswers).length !== quiz.length}>Submit Answers</Button>
+              <div className="p-4 border-t border-brand-gray bg-brand-dark flex justify-end">
+                <Button className="bg-white text-black hover:bg-gray-200" onClick={handleSubmitQuiz} disabled={Object.keys(quizAnswers).length !== quiz.length}>Submit Answers</Button>
               </div>
             )}
           </Card>
         </div>
       )}
 
-      <div className="h-[calc(100vh-4rem)] flex max-w-7xl mx-auto px-4 py-8 gap-6">
+      <div className="h-[calc(100vh-1rem)] pt-24 flex max-w-7xl mx-auto px-4 pb-8 gap-6 justify-center">
         {/* Sidebar - Chat Session History */}
         <div className="w-80 flex-shrink-0 flex flex-col gap-4 hidden md:flex">
-          <Card className="bg-cosmic-blue/40 border-white/10 flex-1 overflow-auto flex flex-col">
-            <div className="p-4 border-b border-white/10">
-              <Button onClick={startNewChat} variant="neon" className="w-full justify-center gap-2">
+          <Card className="bg-brand-dark border-brand-gray flex-1 overflow-auto flex flex-col">
+            <div className="p-4 border-b border-brand-gray">
+              <Button onClick={startNewChat} className="w-full justify-center gap-2 bg-white text-black hover:bg-gray-200">
                 <Plus className="w-4 h-4" /> New Chat
               </Button>
             </div>
@@ -410,10 +410,10 @@ export function AITutor() {
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col gap-4">
-          <Card className="flex-1 bg-cosmic-blue/20 border-white/10 flex flex-col overflow-hidden relative">
+        <div className="flex-1 flex flex-col gap-4 max-w-4xl">
+          <Card className="flex-1 bg-brand-dark border-brand-gray flex flex-col overflow-hidden relative">
             {/* Header / Config (Only show config if New Chat) */}
-            <div className="p-4 border-b border-white/10 flex flex-col gap-4 bg-space-black/30 backdrop-blur-md">
+            <div className="p-4 border-b border-brand-gray flex flex-col gap-4 bg-brand-dark backdrop-blur-md">
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-xl font-bold text-white">
@@ -421,7 +421,7 @@ export function AITutor() {
                   </h2>
                 </div>
                 {!isNewChat && showQuiz && (
-                  <Button variant="outline" size="sm" className="gap-2 text-yellow-400 border-yellow-400/50" onClick={handleGenerateQuiz} disabled={quizLoading}>
+                  <Button variant="outline" size="sm" className="gap-2 text-white border-white/50 hover:bg-white/10" onClick={handleGenerateQuiz} disabled={quizLoading}>
                     {quizLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trophy className="w-4 h-4" />} Micro-Quiz
                   </Button>
                 )}
@@ -435,7 +435,7 @@ export function AITutor() {
                       {/* Custom Topic Dropdown */}
                       <div className="relative">
                         <button
-                          className="w-full flex items-center justify-between bg-slate-900/80 border-2 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)] rounded-lg p-2 text-sm text-cyan-100 focus:outline-none focus:border-cyan-300 focus:shadow-[0_0_20px_rgba(34,211,238,0.6)] transition-all"
+                          className="w-full flex items-center justify-between bg-brand-black border border-brand-gray rounded-lg p-2 text-sm text-white focus:outline-none focus:border-white transition-all"
                           onClick={() => {
                             const dropdown = document.getElementById("topic-dropdown");
                             if (dropdown) dropdown.classList.toggle("hidden");
@@ -446,11 +446,11 @@ export function AITutor() {
                           <ChevronDown className="w-4 h-4 opacity-70" />
                         </button>
 
-                        <div id="topic-dropdown" className="hidden absolute z-50 mt-2 w-full bg-[#0B0B15] border border-cyan-500/30 rounded-lg shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                        <div id="topic-dropdown" className="hidden absolute z-50 mt-2 w-full bg-brand-dark border border-brand-gray rounded-lg shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                           {PREDEFINED_TOPICS.map(t => (
                             <div
                               key={t}
-                              className="px-4 py-2 hover:bg-space-black hover:text-cyan-300 cursor-pointer transition-colors text-gray-300 text-sm border-b border-white/5 last:border-0"
+                              className="px-4 py-2 hover:bg-white/5 hover:text-white cursor-pointer transition-colors text-gray-300 text-sm border-b border-brand-gray last:border-0"
                               onClick={() => {
                                 setSelectedTopic(t);
                                 setCustomTopic("");
@@ -461,7 +461,7 @@ export function AITutor() {
                             </div>
                           ))}
                           <div
-                            className="px-4 py-2 hover:bg-space-black hover:text-cyan-300 cursor-pointer transition-colors text-yellow-400/80 text-sm font-medium"
+                            className="px-4 py-2 hover:bg-white/5 hover:text-white cursor-pointer transition-colors text-white/50 text-sm font-medium"
                             onClick={() => {
                               setSelectedTopic("Custom");
                               // Input handles the rest
@@ -480,7 +480,7 @@ export function AITutor() {
                             setCustomTopic(e.target.value);
                             setSelectedTopic(""); // Clear dropdown visual if typing custom
                           }}
-                          className="bg-space-black/50 border-white/10"
+                          className="bg-brand-black border-brand-gray"
                         />
                       )}
                     </div>
@@ -493,7 +493,7 @@ export function AITutor() {
                           key={analogy.id}
                           onClick={() => setSelectedAnalogy(analogy.id)}
                           className={cn("px-3 py-1.5 rounded-full text-xs border transition-all flex items-center gap-1",
-                            selectedAnalogy === analogy.id ? "bg-nebula-purple/20 border-nebula-purple text-white" : "bg-space-black border-white/10 text-gray-400"
+                            selectedAnalogy === analogy.id ? "bg-white text-black border-white" : "bg-brand-black border-brand-gray text-gray-400"
                           )}
                         >
                           <span>{analogy.icon}</span> {analogy.label}
@@ -505,7 +505,7 @@ export function AITutor() {
                         placeholder="e.g., Harry Potter, Cooking, Cars..."
                         value={customAnalogy}
                         onChange={(e) => setCustomAnalogy(e.target.value)}
-                        className="mt-2 bg-space-black/50 border-white/10 h-8 text-sm"
+                        className="mt-2 bg-brand-black border-brand-gray h-8 text-sm"
                       />
                     )}
                   </div>
@@ -517,16 +517,16 @@ export function AITutor() {
             <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-700">
               {messages.map((msg, i) => (
                 <div key={i} className={cn("flex gap-3 max-w-[85%]", msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto")}>
-                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0", msg.role === "ai" ? "bg-nebula-purple/20 text-nebula-purple" : "bg-highlight-cyan/20 text-highlight-cyan")}>
+                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0", msg.role === "ai" ? "bg-brand-gray/20 text-white" : "bg-white text-black")}>
                     {msg.role === "ai" ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
                   </div>
-                  <div className={cn("p-4 rounded-2xl shadow-lg transition-all w-full", msg.role === "user" ? "bg-nebula-purple/20 text-white border border-nebula-purple/30" : "bg-space-black/80 text-gray-200 border border-white/10")}>
+                  <div className={cn("p-4 rounded-2xl shadow-lg transition-all w-full", msg.role === "user" ? "bg-white text-black border border-white" : "bg-brand-black text-gray-200 border border-brand-gray")}>
                     <div className="text-left prose prose-invert max-w-none text-sm">
                       <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{msg.content}</ReactMarkdown>
                     </div>
                     {msg.keyPoints && msg.keyPoints.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-white/10">
-                        <p className="text-xs font-bold text-highlight-cyan mb-2">Key Points:</p>
+                        <p className="text-xs font-bold text-gray-400 mb-2">Key Points:</p>
                         <ul className="text-xs space-y-1">
                           {msg.keyPoints.map((point, j) => (
                             <li key={j} className="flex gap-2">
@@ -542,14 +542,14 @@ export function AITutor() {
               ))}
               {loading && (
                 <div className="flex gap-3 mr-auto max-w-[80%]">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-nebula-purple/20 text-nebula-purple"><Bot className="w-5 h-5" /></div>
-                  <div className="p-3 rounded-lg bg-cosmic-blue border border-white/5"><Loader2 className="w-5 h-5 animate-spin text-nebula-purple" /></div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-brand-gray/20 text-white"><Bot className="w-5 h-5" /></div>
+                  <div className="p-3 rounded-lg bg-brand-dark border border-brand-gray"><Loader2 className="w-5 h-5 animate-spin text-white" /></div>
                 </div>
               )}
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-white/10 bg-space-black/30 backdrop-blur-md">
+            <div className="p-4 border-t border-brand-gray bg-brand-dark backdrop-blur-md">
               <div className="flex gap-4">
                 <Input
                   placeholder={isNewChat ? "Start the conversation..." : "Ask a follow up question..."}
@@ -557,9 +557,9 @@ export function AITutor() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
                   disabled={loading}
-                  className="bg-space-black/50 border-white/10 focus-visible:ring-nebula-purple"
+                  className="bg-brand-black border-brand-gray focus-visible:ring-brand-gray"
                 />
-                <Button variant="neon" size="icon" onClick={handleSend} disabled={isSendDisabled}>
+                <Button className="bg-white text-black hover:bg-gray-200" size="icon" onClick={handleSend} disabled={isSendDisabled}>
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </Button>
               </div>

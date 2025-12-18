@@ -83,7 +83,7 @@ export function StudyPlanner() {
               description: event.description
             },
             // Props for basic FullCalendar rendering if customContent fails
-            backgroundColor: event.type === 'exam' ? '#EF4444' : '#6C63FF',
+            backgroundColor: event.type === 'exam' ? '#333333' : '#1A1A1A',
             borderColor: 'transparent',
             textColor: '#FFFFFF'
           };
@@ -151,24 +151,24 @@ export function StudyPlanner() {
     return (
       <div className={cn(
         "w-full h-full p-1 flex flex-col gap-0.5 overflow-hidden border-l-4 transition-all hover:scale-[1.01] rounded-r-sm",
-        isExam ? "bg-red-500/10 border-red-500" : "bg-nebula-purple/10 border-nebula-purple",
+        isExam ? "bg-red-500/10 border-red-500" : "bg-brand-gray border-white/20",
         isCompleted && "opacity-60 grayscale-[0.5]"
       )}>
         <div className="flex items-start justify-between min-w-0">
           <span className={cn(
             "text-xs font-bold leading-tight break-words pr-1",
-            isExam ? "text-red-300" : "text-cyan-300",
-            isCompleted && "line-through text-gray-500"
+            isExam ? "text-red-300" : "text-white",
+            isCompleted && "line-through text-brand-text-muted"
           )}>
             {event.title}
           </span>
           {isCompleted ? (
-            <CheckCircle2 className="w-3 h-3 text-green-400 shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-3 h-3 text-white shrink-0 mt-0.5" />
           ) : (
             <Circle className="w-3 h-3 text-white/20 shrink-0 mt-0.5" />
           )}
         </div>
-        <div className="text-[10px] text-gray-400 truncate mt-auto">
+        <div className="text-[10px] text-brand-text-muted truncate mt-auto">
           {eventInfo.timeText}
         </div>
       </div>
@@ -176,27 +176,27 @@ export function StudyPlanner() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-6rem)] flex flex-col">
+    <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-6rem)] flex flex-col bg-brand-black text-brand-text font-inter pt-28">
       <div className="flex justify-between items-center mb-6 shrink-0">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <CalendarIcon className="w-8 h-8 text-highlight-cyan" />
+            <CalendarIcon className="w-8 h-8 text-white" />
             Study Planner
           </h1>
-          <p className="text-gray-400 mt-1">
+          <p className="text-brand-text-muted mt-1">
             Track your progress and stay on schedule.
           </p>
         </div>
         <div className="flex gap-3">
           <Link to="/upload">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 border-brand-gray text-brand-text-muted hover:text-white">
               <Upload className="w-4 h-4" /> New Plan
             </Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={handleViewHistory} className="gap-2">
+          <Button variant="outline" size="sm" onClick={handleViewHistory} className="gap-2 border-brand-gray text-brand-text-muted hover:text-white">
             <History className="w-4 h-4" /> History
           </Button>
-          <Button variant="neon" size="sm" onClick={fetchEvents} disabled={loading} className="gap-2">
+          <Button variant="default" size="sm" onClick={fetchEvents} disabled={loading} className="gap-2 bg-white text-black hover:bg-gray-200">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Sync
           </Button>
@@ -209,22 +209,22 @@ export function StudyPlanner() {
         </div>
       )}
 
-      <Card className="flex-1 bg-cosmic-blue/20 border-white/10 p-4 overflow-hidden backdrop-blur-md relative shadow-2xl shadow-space-black/50 full-calendar-wrapper">
+      <Card className="flex-1 bg-brand-dark border-brand-gray p-4 overflow-hidden relative shadow-none full-calendar-wrapper">
         {loading && events.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-space-black/50 z-10">
-            <Loader2 className="w-10 h-10 text-nebula-purple animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center bg-brand-black/50 z-10">
+            <Loader2 className="w-10 h-10 text-white animate-spin" />
           </div>
         ) : events.length === 0 && !loading && !error ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-fade-in">
-            <div className="w-24 h-24 bg-nebula-purple/10 rounded-full flex items-center justify-center mb-6 border border-nebula-purple/20">
-              <BookOpen className="w-12 h-12 text-nebula-purple" />
+            <div className="w-24 h-24 bg-brand-gray/20 rounded-full flex items-center justify-center mb-6 border border-brand-gray/50">
+              <BookOpen className="w-12 h-12 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-3">Your Schedule is Empty</h2>
-            <p className="text-gray-400 mb-8 max-w-md">
+            <p className="text-brand-text-muted mb-8 max-w-md">
               Ready to start learning? Upload your syllabus to automatically generate a personalized study roadmap.
             </p>
             <Link to="/upload">
-              <Button variant="neon" size="lg" className="gap-2 shadow-lg shadow-highlight-cyan/20">
+              <Button size="lg" className="gap-2 bg-white text-black hover:bg-gray-200">
                 <Upload className="w-5 h-5" />
                 Create Study Plan
               </Button>
@@ -238,7 +238,7 @@ export function StudyPlanner() {
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay'
+              right: 'dayGridMonth,timeGridWeek'
             }}
             events={events}
             eventContent={renderEventContent}
@@ -257,10 +257,10 @@ export function StudyPlanner() {
       {/* Task Details Modal */}
       {selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <Card className="bg-[#0f1115] border border-white/10 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+          <Card className="bg-brand-black border border-brand-gray w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
             <div className={cn(
-              "p-6 border-b",
-              selectedEvent.type === 'exam' ? "bg-red-500/10 border-red-500/20" : "bg-nebula-purple/5 border-white/5"
+              "p-6 border-b border-brand-gray",
+              selectedEvent.type === 'exam' ? "bg-red-500/10" : "bg-brand-dark"
             )}>
               <div className="flex justify-between items-start gap-4">
                 <h3 className={cn(
@@ -276,8 +276,8 @@ export function StudyPlanner() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="flex items-center gap-2 mt-3 text-sm text-gray-400">
-                <Clock className="w-4 h-4 text-nebula-purple" />
+              <div className="flex items-center gap-2 mt-3 text-sm text-brand-text-muted">
+                <Clock className="w-4 h-4 text-white" />
                 <span>
                   {selectedEvent.start && format(selectedEvent.start, 'EEEE, MMM do')} • {selectedEvent.start && format(selectedEvent.start, 'h:mm a')} - {selectedEvent.end && format(selectedEvent.end, 'h:mm a')}
                 </span>
@@ -288,10 +288,10 @@ export function StudyPlanner() {
               {selectedEvent.topic && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                    <BookOpen className="w-4 h-4 text-highlight-cyan" />
+                    <BookOpen className="w-4 h-4 text-white" />
                     Topic
                   </div>
-                  <p className="text-gray-300 bg-white/5 p-3 rounded-lg border border-white/5">
+                  <p className="text-gray-300 bg-brand-gray/20 p-3 rounded-lg border border-brand-gray/50">
                     {selectedEvent.topic}
                   </p>
                 </div>
@@ -300,10 +300,10 @@ export function StudyPlanner() {
               {selectedEvent.description && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                    <AlignLeft className="w-4 h-4 text-highlight-cyan" />
+                    <AlignLeft className="w-4 h-4 text-white" />
                     Description
                   </div>
-                  <p className="text-gray-400 leading-relaxed">
+                  <p className="text-brand-text-muted leading-relaxed">
                     {selectedEvent.description}
                   </p>
                 </div>
@@ -311,10 +311,10 @@ export function StudyPlanner() {
 
               <div className="pt-4 flex justify-end">
                 <Button
-                  variant={selectedEvent.completed ? "outline" : "neon"}
+                  variant={selectedEvent.completed ? "outline" : "default"}
                   className={cn(
                     "w-full sm:w-auto gap-2 transition-all duration-300",
-                    selectedEvent.completed && "border-green-500 text-green-500 hover:bg-green-500/10 hover:text-green-400"
+                    selectedEvent.completed ? "border-green-500 text-green-500 hover:bg-green-500/10" : "bg-white text-black hover:bg-gray-200"
                   )}
                   onClick={toggleEventStatus}
                 >
@@ -340,18 +340,18 @@ export function StudyPlanner() {
       {/* History Modal */}
       {historyOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <Card className="bg-[#0f1115] border border-white/10 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+          <Card className="bg-brand-black border border-brand-gray w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="p-6 border-b border-brand-gray flex justify-between items-center bg-brand-dark">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <History className="w-5 h-5 text-highlight-cyan" /> Upload History
+                <History className="w-5 h-5 text-white" /> Upload History
               </h3>
               <button onClick={() => setHistoryOpen(false)} className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-[#151720]">
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-brand-black">
               {historyLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 text-nebula-purple animate-spin" /></div>
+                <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>
               ) : studyPlans.length === 0 ? (
                 <div className="text-center py-10">
                   <FolderOpen className="w-12 h-12 text-gray-500 mx-auto mb-3 opacity-50" />
@@ -364,15 +364,15 @@ export function StudyPlanner() {
                       key={plan._id}
                       onClick={() => handleLoadPlan(plan._id)}
                       className={cn(
-                        "bg-space-black/40 border rounded-xl p-4 transition-all group cursor-pointer relative overflow-hidden",
+                        "bg-brand-dark border rounded-xl p-4 transition-all group cursor-pointer relative overflow-hidden",
                         currentPlanId === plan._id
-                          ? "border-highlight-cyan bg-highlight-cyan/5"
-                          : "border-white/5 hover:border-white/20 hover:bg-white/5"
+                          ? "border-white bg-brand-gray/50"
+                          : "border-brand-gray hover:border-white/50"
                       )}
                     >
                       {currentPlanId === plan._id && (
                         <div className="absolute top-0 right-0 p-2">
-                          <div className="bg-highlight-cyan text-black text-[10px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider">
+                          <div className="bg-white text-black text-[10px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider">
                             Active
                           </div>
                         </div>
@@ -381,25 +381,25 @@ export function StudyPlanner() {
                         <div>
                           <h4 className={cn(
                             "font-bold text-lg transition-colors",
-                            currentPlanId === plan._id ? "text-highlight-cyan" : "text-gray-200 group-hover:text-highlight-cyan"
+                            currentPlanId === plan._id ? "text-white" : "text-gray-200 group-hover:text-white"
                           )}>
                             {plan.title || "Untitled Plan"}
                           </h4>
-                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                          <p className="text-xs text-brand-text-muted mt-1 flex items-center gap-1">
                             <Clock className="w-3 h-3" /> Created on {format(new Date(plan.createdAt), 'MMMM do, yyyy')}
                           </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                        <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
                           <span className="block text-xl font-bold text-white">{plan.subjectCount}</span>
                           <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Subjects</span>
                         </div>
-                        <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                        <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
                           <span className="block text-xl font-bold text-white">{plan.topicCount}</span>
                           <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Topics</span>
                         </div>
-                        <div className="bg-black/30 p-2 rounded-lg text-center border border-white/5">
+                        <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
                           <span className={cn("block text-xl font-bold", plan.readiness > 70 ? "text-green-400" : "text-yellow-400")}>{Math.round(plan.readiness)}%</span>
                           <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Readiness</span>
                         </div>
@@ -418,14 +418,14 @@ export function StudyPlanner() {
           --fc-page-bg-color: transparent;
           --fc-neutral-bg-color: rgba(255, 255, 255, 0.05);
           --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.1);
-          --fc-today-bg-color: rgba(108, 99, 255, 0.05);
+          --fc-today-bg-color: rgba(255, 255, 255, 0.05);
           --fc-border-color: rgba(255, 255, 255, 0.1);
           --fc-button-bg-color: rgba(255, 255, 255, 0.05);
           --fc-button-border-color: rgba(255, 255, 255, 0.1);
           --fc-button-text-color: #A1A1AA;
-          --fc-button-active-bg-color: #6C63FF;
-          --fc-button-active-border-color: #6C63FF;
-          --fc-button-active-text-color: white;
+          --fc-button-active-bg-color: #ffffff;
+          --fc-button-active-border-color: #ffffff;
+          --fc-button-active-text-color: black;
           --fc-event-bg-color: transparent;
           --fc-event-border-color: transparent;
         }
@@ -480,6 +480,7 @@ export function StudyPlanner() {
         .fc .fc-button-primary:not(:disabled).fc-button-active {
           background-color: var(--fc-button-active-bg-color);
           border-color: var(--fc-button-active-border-color);
+          color: var(--fc-button-active-text-color);
         }
       `}</style>
     </div>
