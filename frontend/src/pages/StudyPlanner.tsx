@@ -207,18 +207,18 @@ export function StudyPlanner() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-6rem)] flex flex-col bg-brand-black text-brand-text font-inter pt-28">
-      <div className="flex justify-between items-center mb-6 shrink-0">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8 min-h-[calc(100vh-6rem)] flex flex-col bg-brand-black text-brand-text font-inter pt-24 sm:pt-28">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4 shrink-0">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <CalendarIcon className="w-8 h-8 text-white" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
+            <CalendarIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             Study Planner
           </h1>
           <p className="text-brand-text-muted mt-1">
             Track your progress and stay on schedule.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
           <Link to="/upload">
             <Button variant="outline" size="sm" className="gap-2 border-white/10 bg-white/5 text-brand-text-muted hover:text-white hover:bg-white/10 backdrop-blur-sm transition-all">
               <Upload className="w-4 h-4" /> New Plan
@@ -240,7 +240,7 @@ export function StudyPlanner() {
         </div>
       )}
 
-      <Card className="flex-1 bg-brand-dark/40 backdrop-blur-xl border-white/10 p-6 overflow-y-auto custom-scrollbar relative shadow-2xl full-calendar-wrapper rounded-3xl">
+      <Card className="flex-1 bg-brand-dark/40 backdrop-blur-xl border-white/10 p-3 sm:p-6 overflow-y-auto custom-scrollbar relative shadow-2xl full-calendar-wrapper rounded-2xl sm:rounded-3xl">
         {loading && events.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center bg-brand-black/50 z-10">
             <Loader2 className="w-10 h-10 text-white animate-spin" />
@@ -288,7 +288,7 @@ export function StudyPlanner() {
       {/* Task Details Modal */}
       {selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <Card className="bg-brand-black border border-brand-gray w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+          <Card className="bg-brand-black border border-brand-gray w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh] sm:max-h-[90vh] mx-2 sm:mx-0">
             <div className={cn(
               "p-6 border-b border-brand-gray",
               selectedEvent.type === 'exam' ? "bg-red-500/10" : "bg-brand-dark"
@@ -371,7 +371,7 @@ export function StudyPlanner() {
       {/* History Modal */}
       {historyOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <Card className="bg-brand-black border border-brand-gray w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+          <Card className="bg-brand-black border border-brand-gray w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[80vh] mx-2 sm:mx-0">
             <div className="p-6 border-b border-brand-gray flex justify-between items-center bg-brand-dark">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <History className="w-5 h-5 text-white" /> Upload History
@@ -469,7 +469,7 @@ export function StudyPlanner() {
                         </div>
                       )}
                       
-                      <div className="grid grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
                           <span className="block text-lg font-bold text-white">{plan.subjectCount}</span>
                           <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider">Subjects</span>
@@ -571,9 +571,9 @@ export function StudyPlanner() {
           --fc-event-border-color: transparent;
         }
 
-        /* Toolbar */
+        /* Toolbar - Mobile Responsive */
         .fc .fc-toolbar-title {
-          font-size: 1.5rem;
+          font-size: 1.25rem;
           font-weight: 700;
           letter-spacing: -0.025em;
           background: linear-gradient(to right, #fff, #9CA3AF);
@@ -581,18 +581,67 @@ export function StudyPlanner() {
           -webkit-text-fill-color: transparent;
         }
 
+        @media (min-width: 640px) {
+          .fc .fc-toolbar-title {
+            font-size: 1.5rem;
+          }
+        }
+
         .fc .fc-toolbar.fc-header-toolbar {
-          margin-bottom: 2rem;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          row-gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+          .fc .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 2rem;
+          }
+        }
+
+        /* Mobile: Stack toolbar sections */
+        @media (max-width: 639px) {
+          .fc .fc-toolbar.fc-header-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          
+          .fc .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+          }
+          
+          .fc .fc-toolbar-chunk:first-child {
+            order: 2;
+          }
+          
+          .fc .fc-toolbar-chunk:nth-child(2) {
+            order: 1;
+            margin-bottom: 0.5rem;
+          }
+          
+          .fc .fc-toolbar-chunk:last-child {
+            order: 3;
+          }
         }
 
         /* Headers */
         .fc .fc-col-header-cell-cushion {
           color: #A1A1AA;
-          font-size: 0.75rem;
+          font-size: 0.65rem;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
-          padding: 16px 0;
+          letter-spacing: 0.05em;
+          padding: 8px 0;
+        }
+
+        @media (min-width: 640px) {
+          .fc .fc-col-header-cell-cushion {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            padding: 16px 0;
+          }
         }
 
         /* Grid */
@@ -602,14 +651,27 @@ export function StudyPlanner() {
         
         .fc-theme-standard .fc-scrollgrid {
           border: 1px solid var(--fc-border-color);
-          border-radius: 1rem;
+          border-radius: 0.75rem;
           overflow: hidden;
         }
 
-        /* Cells */
+        @media (min-width: 640px) {
+          .fc-theme-standard .fc-scrollgrid {
+            border-radius: 1rem;
+          }
+        }
+
+        /* Cells - Mobile */
         .fc-daygrid-day-frame {
-          padding: 8px;
+          padding: 2px;
           transition: background-color 0.2s;
+          min-height: auto !important;
+        }
+
+        @media (min-width: 640px) {
+          .fc-daygrid-day-frame {
+            padding: 8px;
+          }
         }
         
         .fc-daygrid-day:hover .fc-daygrid-day-frame {
@@ -619,15 +681,29 @@ export function StudyPlanner() {
         .fc-daygrid-day-top {
           flex-direction: row;
           justify-content: space-between;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
+        }
+
+        @media (min-width: 640px) {
+          .fc-daygrid-day-top {
+            margin-bottom: 4px;
+          }
         }
 
         .fc-daygrid-day-number {
-          font-size: 0.875rem;
+          font-size: 0.7rem;
           font-weight: 500;
           color: #71717A;
-          padding: 4px 8px;
-          border-radius: 6px;
+          padding: 2px 4px;
+          border-radius: 4px;
+        }
+
+        @media (min-width: 640px) {
+          .fc-daygrid-day-number {
+            font-size: 0.875rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+          }
         }
         
         .fc-day-today .fc-daygrid-day-number {
@@ -641,7 +717,24 @@ export function StudyPlanner() {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 2px;
+        }
+
+        @media (min-width: 640px) {
+          .fc-daygrid-day-events {
+            gap: 4px;
+          }
+        }
+
+        /* Mobile event styling - more compact */
+        @media (max-width: 639px) {
+          .fc-daygrid-event {
+            margin: 0 1px !important;
+          }
+          
+          .fc-daygrid-event-harness {
+            margin-top: 1px !important;
+          }
         }
 
         /* Remove default event styling to let custom content take over */
@@ -656,15 +749,23 @@ export function StudyPlanner() {
           border: none;
         }
 
-        /* Buttons */
+        /* Buttons - Mobile Responsive */
         .fc .fc-button {
-          font-size: 0.875rem;
+          font-size: 0.75rem;
           font-weight: 500;
-          padding: 0.5rem 1.25rem;
-          border-radius: 0.75rem;
+          padding: 0.375rem 0.75rem;
+          border-radius: 0.5rem;
           text-transform: capitalize;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           backdrop-filter: blur(8px);
+        }
+
+        @media (min-width: 640px) {
+          .fc .fc-button {
+            font-size: 0.875rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.75rem;
+          }
         }
         
         .fc .fc-button:hover {
@@ -685,6 +786,44 @@ export function StudyPlanner() {
           color: black;
           transform: translateY(0);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Today button - hide text on mobile */
+        @media (max-width: 479px) {
+          .fc .fc-today-button {
+            padding: 0.375rem 0.5rem;
+          }
+        }
+
+        /* Button group - tighter on mobile */
+        .fc .fc-button-group {
+          gap: 0;
+        }
+
+        .fc .fc-button-group > .fc-button {
+          border-radius: 0;
+        }
+
+        .fc .fc-button-group > .fc-button:first-child {
+          border-top-left-radius: 0.5rem;
+          border-bottom-left-radius: 0.5rem;
+        }
+
+        .fc .fc-button-group > .fc-button:last-child {
+          border-top-right-radius: 0.5rem;
+          border-bottom-right-radius: 0.5rem;
+        }
+
+        @media (min-width: 640px) {
+          .fc .fc-button-group > .fc-button:first-child {
+            border-top-left-radius: 0.75rem;
+            border-bottom-left-radius: 0.75rem;
+          }
+
+          .fc .fc-button-group > .fc-button:last-child {
+            border-top-right-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+          }
         }
       `}</style>
     </div>

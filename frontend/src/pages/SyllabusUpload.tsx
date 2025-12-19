@@ -105,16 +105,16 @@ export function SyllabusUpload() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-8 sm:py-12 pt-24 sm:pt-28">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-white mb-4">Upload Your Syllabus</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Upload Your Syllabus</h1>
         <p className="text-gray-400">
           Upload your course PDF or image. Our AI will analyze it and create a personalized study plan.
         </p>
       </div>
 
       <Card className="bg-cosmic-blue/20 border-white/10 overflow-hidden">
-        <CardContent className="p-8">
+        <CardContent className="p-4 sm:p-6 lg:p-8">
           {error && (
             <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
               {error}
@@ -124,7 +124,7 @@ export function SyllabusUpload() {
           {!uploadSuccess ? (
             <div
               className={cn(
-                "border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[300px]",
+                "border-2 border-dashed rounded-xl p-6 sm:p-8 lg:p-12 text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[250px] sm:min-h-[300px]",
                 dragActive ? "border-highlight-cyan bg-highlight-cyan/5" : "border-gray-600 hover:border-gray-400 bg-space-black/50",
                 file ? "border-nebula-purple" : ""
               )}
@@ -180,7 +180,7 @@ export function SyllabusUpload() {
 
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-400 mb-3">Study Timeline</label>
-                    <div className="grid grid-cols-3 gap-2 mb-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                       {['3-days', '7-days', '1-month', '3-months', 'custom'].map((opt) => (
                         <button
                           key={opt}

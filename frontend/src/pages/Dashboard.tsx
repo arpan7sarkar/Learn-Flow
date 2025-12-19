@@ -80,10 +80,10 @@ export function Dashboard() {
         </div>
 
         {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 
           {/* Stat Card: Streak */}
-          <div className="bg-brand-dark border border-brand-gray rounded-3xl p-6 flex flex-col justify-between h-48 group hover:border-brand-text-muted/20 transition-colors">
+          <div className="bg-brand-dark border border-brand-gray rounded-3xl p-5 sm:p-6 flex flex-col justify-between h-40 sm:h-48 group hover:border-brand-text-muted/20 transition-colors">
              <div className="flex justify-between items-start">
                <div className="p-3 bg-brand-gray/50 rounded-2xl">
                  <Trophy className="text-white w-6 h-6" />
@@ -97,7 +97,7 @@ export function Dashboard() {
           </div>
 
           {/* Stat Card: Progress */}
-          <div className="bg-brand-dark border border-brand-gray rounded-3xl p-6 flex flex-col justify-between h-48 group hover:border-brand-text-muted/20 transition-colors">
+          <div className="bg-brand-dark border border-brand-gray rounded-3xl p-5 sm:p-6 flex flex-col justify-between h-40 sm:h-48 group hover:border-brand-text-muted/20 transition-colors">
              <div className="flex justify-between items-start">
                <div className="p-3 bg-brand-gray/50 rounded-2xl">
                  <CheckCircle className="text-white w-6 h-6" />
@@ -111,7 +111,7 @@ export function Dashboard() {
           </div>
 
            {/* Stat Card: Hours */}
-           <div className="bg-brand-dark border border-brand-gray rounded-3xl p-6 flex flex-col justify-between h-48 group hover:border-brand-text-muted/20 transition-colors">
+           <div className="bg-brand-dark border border-brand-gray rounded-3xl p-5 sm:p-6 flex flex-col justify-between h-40 sm:h-48 group hover:border-brand-text-muted/20 transition-colors">
              <div className="flex justify-between items-start">
                <div className="p-3 bg-brand-gray/50 rounded-2xl">
                  <Clock className="text-white w-6 h-6" />
@@ -125,7 +125,7 @@ export function Dashboard() {
           </div>
 
           {/* Quick Action: AI Tutor */}
-          <Link to="/tutor" className="bg-brand-dark border border-brand-gray rounded-3xl p-6 flex flex-col justify-between h-48 group cursor-pointer hover:bg-brand-gray/30 transition-all relative overflow-hidden">
+          <Link to="/tutor" className="bg-brand-dark border border-brand-gray rounded-3xl p-5 sm:p-6 flex flex-col justify-between h-40 sm:h-48 group cursor-pointer hover:bg-brand-gray/30 transition-all relative overflow-hidden">
              <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity">
                <ArrowUpRight className="w-5 h-5 text-brand-text-muted" />
              </div>
@@ -139,7 +139,7 @@ export function Dashboard() {
           </Link>
 
           {/* Large Card: Upcoming Tasks */}
-          <div className="md:col-span-3 bg-brand-dark border border-brand-gray rounded-3xl p-8 min-h-[300px]">
+          <div className="sm:col-span-2 lg:col-span-3 bg-brand-dark border border-brand-gray rounded-3xl p-5 sm:p-8 min-h-[280px] sm:min-h-[300px]">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-brand-text-muted" /> 
@@ -155,7 +155,7 @@ export function Dashboard() {
                 <Loader2 className="w-8 h-8 animate-spin text-brand-gray" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {upcomingTasks.length > 0 ? upcomingTasks.map((task, i) => (
                   <div key={i} className="bg-brand-black/50 border border-brand-gray/50 rounded-2xl p-5 hover:border-brand-text-muted/30 transition-colors">
                     <div className="flex justify-between items-start mb-3">
@@ -184,7 +184,7 @@ export function Dashboard() {
           </div>
 
           {/* Medium Card: Quick Syllabus Upload Call action if needed, or something else. Reusing topics mastered logic */}
-           <div className="md:col-span-1 bg-brand-dark border border-brand-gray rounded-3xl p-8 flex flex-col items-center justify-center text-center">
+           <div className="sm:col-span-2 lg:col-span-1 bg-brand-dark border border-brand-gray rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center">
               <div className="w-24 h-24 rounded-full border-4 border-brand-gray flex items-center justify-center mb-6 relative">
                  <div className="text-3xl font-bold">{stats.topicsMastered}</div>
                  <div className="absolute inset-0 border-4 border-green-500 rounded-full border-t-transparent animate-spin [animation-duration:3s]"></div>

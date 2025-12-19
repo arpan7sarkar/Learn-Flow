@@ -342,8 +342,8 @@ export function AITutor() {
     <>
       {/* Quiz Modal Overlay */}
       {quiz && quiz.length > 0 && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <Card className="w-full max-w-7xl bg-brand-black border-brand-gray shadow-2xl max-h-[90vh] flex flex-col">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-2 sm:p-4 animate-in fade-in duration-200">
+          <Card className="w-full max-w-7xl bg-brand-black border-brand-gray shadow-2xl max-h-[95vh] sm:max-h-[90vh] flex flex-col">
             <div className="p-4 border-b border-brand-gray flex justify-between items-center bg-brand-dark">
               <h4 className="text-xl font-bold text-white flex items-center gap-2">
                 <Trophy className="w-6 h-6" /> Quick Quiz
@@ -377,7 +377,7 @@ export function AITutor() {
                       <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={{ p: ({ children }) => <span className="inline">{children}</span> }}>{q.question}</ReactMarkdown>
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {q.options.map((opt, j) => {
                       let btnClass = "bg-brand-dark border-brand-gray text-gray-300 hover:border-white/30 hover:bg-white/5";
                       const match = opt.match(/^([A-Da-d])[\)\.]/);
@@ -420,9 +420,9 @@ export function AITutor() {
         </div>
       )}
 
-      <div className="h-[calc(100vh-1rem)] pt-24 flex max-w-7xl mx-auto px-4 pb-8 gap-6 justify-center">
+      <div className="h-[calc(100vh-1rem)] pt-20 sm:pt-24 flex max-w-7xl mx-auto px-2 sm:px-4 pb-4 sm:pb-8 gap-4 sm:gap-6 justify-center">
         {/* Sidebar - Chat Session History */}
-        <div className="w-80 flex-shrink-0 hidden md:flex flex-col gap-4">
+        <div className="w-72 lg:w-80 flex-shrink-0 hidden md:flex flex-col gap-4">
           <Card className="bg-brand-dark border-brand-gray flex-1 overflow-auto flex flex-col">
             <div className="p-4 border-b border-brand-gray">
               <Button onClick={startNewChat} className="w-full justify-center gap-2 bg-white text-black hover:bg-gray-200">
@@ -457,13 +457,13 @@ export function AITutor() {
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col gap-4 max-w-4xl">
+        <div className="flex-1 flex flex-col gap-4 max-w-4xl w-full">
           <Card className="flex-1 bg-brand-dark border-brand-gray flex flex-col overflow-hidden relative">
             {/* Header / Config (Only show config if New Chat) */}
-            <div className="p-4 border-b border-brand-gray flex flex-col gap-4 bg-brand-dark backdrop-blur-md">
-              <div className="flex justify-between items-center">
+            <div className="p-3 sm:p-4 border-b border-brand-gray flex flex-col gap-3 sm:gap-4 bg-brand-dark backdrop-blur-md">
+              <div className="flex justify-between items-center gap-2">
                 <div>
-                  <h2 className="text-xl font-bold text-white">
+                  <h2 className="text-lg sm:text-xl font-bold text-white truncate">
                     {isNewChat ? "Start a New Session" : (sessions.find(s => s._id === currentSessionId)?.topic || "Chat Session")}
                   </h2>
                 </div>
@@ -475,7 +475,7 @@ export function AITutor() {
               </div>
 
               {isNewChat && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-300">
+                <div className="grid grid-cols-1 gap-4 animate-in slide-in-from-top-4 duration-300">
                   <div>
                     <label className="text-xs text-gray-400 mb-2 block">Topic</label>
                     <div className="space-y-2">

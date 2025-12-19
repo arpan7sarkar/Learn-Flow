@@ -31,7 +31,7 @@ export function Testimonials() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {testimonials.map((t, i) => (
           <div key={i} className="group p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors relative">
             <Quote className="w-8 h-8 text-white/20 mb-6" />
