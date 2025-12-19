@@ -255,7 +255,7 @@ export function StudyPlanner() {
               Ready to start learning? Upload your syllabus to automatically generate a personalized study roadmap.
             </p>
             <Link to="/upload">
-              <Button size="lg" className="gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 border-0 text-white hover:opacity-90 transition-opacity">
+               <Button size="lg" className="gap-2 bg-white text-black hover:bg-gray-200">
                 <Upload className="w-5 h-5" />
                 Create Study Plan
               </Button>

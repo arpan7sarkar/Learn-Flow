@@ -31,8 +31,12 @@ Rules:
 2. Include some application-based questions
 3. All 4 options should be plausible
 4. Response must be valid JSON only
-5. IMPORTANT: Wrap ALL mathematical formulas in dollar signs ($) for LaTeX rendering (e.g., use "$\\\\frac{1}{2}$", not "\\frac{1}{2}" or "1/2").
-6. IMPORTANT: You MUST double-escape all backslashes (e.g., use "$\\\\psi$" instead of "$\\psi$").`;
+5. FORMATTING RULES:
+   - Use standard **Markdown** for text formatting (bold, italics, code blocks).
+   - Use **LaTeX** for ALL mathematical expressions, wrapped in single dollar signs ($).
+   - Example directly in string: "The density is $\\\\rho = \\\\frac{m}{V}$".
+   - IMPORTANT: You MUST double-escape all backslashes in the JSON string (e.g., use "\\\\frac" for fraction).
+   - Do NOT use plain text for math (no "x^2", use "$x^2$").`;
 
   try {
     const result = await generateContentWithRetry(model, prompt);
