@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar, getAllStudyPlans, getStudyAnalytics } from '../controllers/plannerController.js';
+import { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar, getAllStudyPlans, getStudyAnalytics, deleteStudyPlan } from '../controllers/plannerController.js';
 
 const router = express.Router();
 
@@ -23,5 +23,8 @@ router.get('/all-study-plans', getAllStudyPlans);
 
 // Get study analytics
 router.get('/study-analytics', getStudyAnalytics);
+
+// Delete study plan
+router.delete('/study-plan/:id', deleteStudyPlan);
 
 export default router;

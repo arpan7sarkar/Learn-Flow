@@ -1,3 +1,4 @@
+
 import { getModel } from './model.js';
 import { generateContentWithRetry } from './utils.js';
 
@@ -15,104 +16,42 @@ export const generateStudyPlanWithAI = async (
   hoursPerDay = 4
 ) => {
   const model = getModel(process.env.GEMINI_API_KEY_PLAN);
-  
-  const today = new Date();
-  const exam = new Date(examDate);
-  const daysUntilExam = Math.ceil((exam - today) / (1000 * 60 * 60 * 24));
-  
-  // Calculate total topics and estimated hours
-  let totalTopics = 0;
-  let totalEstimatedHours = 0;
-  subjects.forEach(subject => {
-    subject.topics.forEach(topic => {
-      totalTopics++;
-      totalEstimatedHours += topic.estimatedHours || 2;
-    });
-  });
 
-  const prompt = `You are an expert AI study planner specialized in creating personalized, science-backed study schedules. Your goal is to maximize learning retention and exam readiness.
+  const prompt = `You are a study planner AI. Create an optimized study schedule.
 
-## STUDENT CONTEXT
-- **Subjects & Topics:** ${JSON.stringify(subjects, null, 2)}
-- **Exam Date:** ${examDate} (${daysUntilExam} days from today)
-- **Available Study Hours Per Day:** ${hoursPerDay} hours
-- **Today's Date:** ${today.toISOString().split("T")[0]}
-- **Total Topics:** ${totalTopics}
-- **Total Estimated Study Hours Needed:** ${totalEstimatedHours}
+SUBJECTS AND TOPICS:
+${JSON.stringify(subjects, null, 2)}
 
-## SCHEDULING PRINCIPLES (Apply These)
+EXAM DATE: ${examDate}
+HOURS PER DAY: ${hoursPerDay}
+TODAY: ${new Date().toISOString().split("T")[0]}
 
-### 1. Spaced Repetition
-- Schedule review sessions 1, 3, and 7 days after initial learning
-- Harder topics need more review cycles
-- Topics with higher weightage should appear more frequently
-
-### 2. Cognitive Load Management  
-- Start each day with moderately difficult material (warm-up)
-- Place most challenging topics in the middle of study sessions (peak focus)
-- End with lighter review or easier topics (cool-down)
-- Limit consecutive hours on same subject to 2 hours max
-
-### 3. Interleaving Practice
-- Mix different subjects within the same day when possible
-- Alternate between conceptual and problem-solving topics
-- Avoid back-to-back sessions on highly similar topics
-
-### 4. Strategic Time Allocation
-- High weightage topics get 50% more time
-- Difficult topics (estimatedHours >= 3) get priority slots
-- Reserve final 2-3 days before exam for comprehensive review only
-
-### 5. Session Structure (Pomodoro-based)
-- Each session should be 25-50 minutes of focused study
-- Sessions close together form a single "duration" block
-- Include implicit break time in duration estimates
-
-## OUTPUT FORMAT
-Return ONLY valid JSON with this exact structure:
+Create a JSON response with this structure:
 {
   "schedule": [
     {
       "date": "YYYY-MM-DD",
       "sessions": [
         {
-          "topic": "Exact topic name from input",
-          "subject": "Subject name",
-          "duration": 1.5,
-          "type": "study|review|practice|revision",
-          "priority": "high|medium|low",
-          "startTime": "09:00",
-          "endTime": "10:30",
-          "description": "Brief learning objective for this session"
+          "topic": "topic name",
+          "subject": "subject name",
+          "duration": 2,
+          "type": "study|review",
+          "priority": "high|medium|low"
         }
       ]
     }
   ],
-  "tips": [
-    "Personalized tip based on the specific subjects",
-    "Study technique relevant to these topics",
-    "Motivation or focus tip",
-    "Pre-exam preparation tip"
-  ],
-  "estimatedReadiness": 85,
-  "planSummary": {
-    "totalStudyHours": 40,
-    "avgHoursPerDay": 4,
-    "reviewSessions": 15,
-    "focusAreas": ["topic1", "topic2"]
-  }
+  "tips": ["study tip 1", "study tip 2"],
+  "estimatedReadiness": 85
 }
 
-## CRITICAL RULES
-1. NEVER exceed ${hoursPerDay} hours of study per day
-2. ALWAYS include at least 2 review/revision sessions for each topic
-3. Start times should begin at 09:00 and respect day boundaries
-4. Sessions should have realistic gaps (30 min breaks between 2-hour blocks)
-5. Final 1-2 days should be ONLY revision type sessions
-6. estimatedReadiness should be 0-100 based on time available vs needed
-7. Response must be ONLY the JSON object, no markdown, no explanation
-
-Generate the optimal study plan now:`;
+Rules:
+1. Distribute topics evenly to prevent burnout
+2. Include review sessions for difficult topics
+3. Leave buffer time before exam
+4. Harder topics get more time
+5. Response must be valid JSON only`;
 
   try {
     const result = await generateContentWithRetry(model, prompt);

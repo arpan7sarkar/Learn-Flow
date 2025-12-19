@@ -59,6 +59,16 @@ export async function getAllStudyPlans(userEmail?: string) {
   return fetchAPI(`/all-study-plans${params}`);
 }
 
+/**
+ * Delete a study plan
+ */
+export async function deleteStudyPlan(planId: string, userEmail?: string) {
+  const params = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
+  return fetchAPI(`/study-plan/${planId}${params}`, {
+    method: 'DELETE',
+  });
+}
+
 // ==================== Planner APIs ====================
 
 /**
@@ -178,6 +188,8 @@ export async function healthCheck() {
 export default {
   uploadSyllabus,
   getStudyPlan,
+  getAllStudyPlans,
+  deleteStudyPlan,
   generateStudyPlan,
   getStudyCalendar,
   updateCalendarEvent,

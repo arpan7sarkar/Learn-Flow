@@ -378,4 +378,51 @@ export const getStudyAnalytics = async (req, res) => {
   }
 };
 
-export default { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar, getStudyPlan, getAllStudyPlans, getStudyAnalytics };
+/**
+ * Delete a study plan and its calendar events
+ * DELETE /api/study-plan/:id
+ */
+export const deleteStudyPlan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userEmail = req.query.userEmail;
+    
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
+    }
+
+    const User = (await import('../models/User.js')).default;
+    const user = await User.findOne({ email: userEmail });
+    
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+
+    // Find the study plan and verify ownership
+    const studyPlan = await StudyPlan.findOne({ _id: id, userId: user._id });
+    
+    if (!studyPlan) {
+      return res.status(404).json({ error: 'Study plan not found or unauthorized' });
+    }
+
+    // Delete all calendar events associated with this plan
+    await CalendarEvent.deleteMany({ studyPlanId: id });
+
+    // Remove plan reference from user's studyPlans array
+    user.studyPlans = user.studyPlans.filter(planId => planId.toString() !== id);
+    await user.save();
+
+    // Delete the study plan
+    await StudyPlan.deleteOne({ _id: id });
+
+    res.json({
+      success: true,
+      message: 'Study plan deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete study plan error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export default { generateStudyPlan, getStudyCalendar, updateCalendarEvent, clearCalendar, getStudyPlan, getAllStudyPlans, getStudyAnalytics, deleteStudyPlan };
