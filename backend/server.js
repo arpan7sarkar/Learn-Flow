@@ -14,49 +14,19 @@ dotenv.config();
 // Initialize Express
 const app = express();
 
+// CORS Configuration - Permissive for debugging
+app.use(cors({
+  origin: true, // Allow all origins for now (set to specific URLs after debugging)
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+}));
 
-const configuredFrontendUrl = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.replace(/\/+$/, "")
-  : "";
-app.use(
-  cors({
-    origin: (requestOrigin, callback) => {
-      // Allow non-browser requests (like curl, server-to-server) with no origin
-      if (!requestOrigin) return callback(null, true);
-      const normalizedIncoming = requestOrigin.replace(/\/+$/, "");
-      if (configuredFrontendUrl && normalizedIncoming === configuredFrontendUrl) {
-        return callback(null, true);
-      }
-      // Not allowed by CORS
-      return callback(new Error("CORS policy: origin not allowed"), false);
-    },
-    credentials: true,
-  })
-);
+// Explicitly handle preflight OPTIONS requests
+app.options('*', cors());
+
 // Middleware
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     const allowedOrigins = [
-//       process.env.FRONTEND_URL,
-//       'https://learn-flow-mu.vercel.app/',
-//       'https://learn-flow.vercel.app/',
-//       'http://localhost:5173',
-//       'http://localhost:3000',
-//     ];
-//     // Allow requests with no origin (like mobile apps or curl requests)
-//     if (!origin) return callback(null, true);
-    
-//     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-//       callback(null, true);
-//     } else {
-//       console.log('CORS blocked:', origin);
-//       callback(null, true); // Permissive for debugging
-//     }
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -115,7 +85,7 @@ app.use((req, res) => {
 // Start server
 // Start server only if not running in Vercel (or similar serverless) environment
 const PORT = process.env.PORT || 5000;
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' || 'Production') {
   app.listen(PORT, () => {
     console.log(`🚀 Learn-Flow Backend running on port ${PORT}`);
     console.log(`📚 API available at http://localhost:${PORT}`);
