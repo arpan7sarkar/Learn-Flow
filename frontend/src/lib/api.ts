@@ -25,10 +25,11 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 /**
  * Upload syllabus PDF
  */
-export async function uploadSyllabus(file: File, title?: string) {
+export async function uploadSyllabus(file: File, title?: string, userEmail?: string) {
   const formData = new FormData();
   formData.append('syllabus', file);
   if (title) formData.append('title', title);
+  if (userEmail) formData.append('userEmail', userEmail);
 
   const response = await fetch(`${API_BASE_URL}/upload-syllabus`, {
     method: 'POST',
@@ -53,8 +54,8 @@ export async function getStudyPlan(planId: string) {
 /**
  * Get all study plans (history)
  */
-export async function getAllStudyPlans(userId?: string) {
-  const params = userId ? `?userId=${userId}` : '';
+export async function getAllStudyPlans(userEmail?: string) {
+  const params = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
   return fetchAPI(`/all-study-plans${params}`);
 }
 
@@ -63,19 +64,19 @@ export async function getAllStudyPlans(userId?: string) {
 /**
  * Generate study plan from uploaded syllabus
  */
-export async function generateStudyPlan(studyPlanId: string, hoursPerDay = 4, examDate?: string) {
+export async function generateStudyPlan(studyPlanId: string, hoursPerDay = 4, examDate?: string, userEmail?: string) {
   return fetchAPI('/generate-study-plan', {
     method: 'POST',
-    body: JSON.stringify({ studyPlanId, hoursPerDay, examDate }),
+    body: JSON.stringify({ studyPlanId, hoursPerDay, examDate, userEmail }),
   });
 }
 
 /**
  * Get calendar events
  */
-export async function getStudyCalendar(userId?: string, startDate?: string, endDate?: string, studyPlanId?: string) {
+export async function getStudyCalendar(userEmail?: string, startDate?: string, endDate?: string, studyPlanId?: string) {
   const params = new URLSearchParams();
-  if (userId) params.append('userId', userId);
+  if (userEmail) params.append('userEmail', userEmail);
   if (startDate) params.append('startDate', startDate);
   if (endDate) params.append('endDate', endDate);
   if (studyPlanId) params.append('studyPlanId', studyPlanId);
@@ -87,10 +88,10 @@ export async function getStudyCalendar(userId?: string, startDate?: string, endD
 /**
  * Update calendar event completion
  */
-export async function updateCalendarEvent(eventId: string, completed: boolean) {
+export async function updateCalendarEvent(eventId: string, completed: boolean, userEmail?: string) {
   return fetchAPI(`/calendar-event/${eventId}`, {
     method: 'PATCH',
-    body: JSON.stringify({ completed }),
+    body: JSON.stringify({ completed, userEmail }),
   });
 }
 
@@ -99,60 +100,70 @@ export async function updateCalendarEvent(eventId: string, completed: boolean) {
 /**
  * Get AI explanation for a topic
  */
-export async function explainTopic(topic: string, analogy: string = 'reallife', sessionId?: string) {
+export async function explainTopic(topic: string, analogy: string = 'reallife', sessionId?: string, userEmail?: string) {
   return fetchAPI('/ai-explain-topic', {
     method: 'POST',
-    body: JSON.stringify({ topic, analogy, sessionId }),
+    body: JSON.stringify({ topic, analogy, sessionId, userEmail }),
   });
 }
 
 /**
  * Generate quiz for a topic
  */
-export async function generateQuiz(topic: string, numQuestions = 5) {
+export async function generateQuiz(topic: string, numQuestions = 5, userEmail?: string) {
   return fetchAPI('/generate-quiz', {
     method: 'POST',
-    body: JSON.stringify({ topic, numQuestions }),
+    body: JSON.stringify({ topic, numQuestions, userEmail }),
   });
 }
 
 /**
  * Submit quiz answers
  */
-export async function submitQuiz(topic: string, answers: any[]) {
+export async function submitQuiz(topic: string, answers: any[], userEmail?: string) {
   return fetchAPI('/submit-quiz', {
     method: 'POST',
-    body: JSON.stringify({ topic, answers }),
+    body: JSON.stringify({ topic, answers, userEmail }),
   });
 }
 
 /**
  * Get quiz history
  */
-export async function getQuizHistory(userId?: string) {
-  const params = userId ? `?userId=${userId}` : '';
+export async function getQuizHistory(userEmail?: string) {
+  const params = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
   return fetchAPI(`/quiz-history${params}`);
-}/**
+}
+
+/**
+ * Get study analytics (stats, streaks, progress)
+ */
+export async function getStudyAnalytics(userEmail?: string) {
+  const params = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
+  return fetchAPI(`/study-analytics${params}`);
+}
+
+/**
  * Get chat sessions list
  */
-export async function getChatSessions(userId?: string) {
-  const params = userId ? `?userId=${userId}` : '';
+export async function getChatSessions(userEmail?: string) {
+  const params = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
   return fetchAPI(`/chat-history${params}`);
 }
 
 /**
  * Get specific chat session
  */
-export async function getChatSession(sessionId: string, userId?: string) {
-  const params = userId ? `?userId=${userId}` : '';
+export async function getChatSession(sessionId: string, userEmail?: string) {
+  const params = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
   return fetchAPI(`/chat-session/${sessionId}${params}`);
 }
 
 /**
  * Delete chat session
  */
-export async function deleteChatSession(sessionId: string, userId?: string) {
-  const params = userId ? `?userId=${userId}` : '';
+export async function deleteChatSession(sessionId: string, userEmail?: string) {
+  const params = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
   return fetchAPI(`/chat-session/${sessionId}${params}`, {
     method: 'DELETE',
   });
@@ -174,7 +185,11 @@ export default {
   generateQuiz,
   submitQuiz,
   getQuizHistory,
+  getStudyAnalytics,
   getChatSessions,
   getChatSession,
+  deleteChatSession,
   healthCheck,
 };
+
+

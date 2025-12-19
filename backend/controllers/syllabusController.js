@@ -27,12 +27,17 @@ export const uploadSyllabus = async (req, res) => {
     // Clean up uploaded file
     fs.unlinkSync(filePath);
 
-    // Get or create a demo user (in production, use auth)
-    let user = await User.findOne({ email: 'demo@learnflow.com' });
+    // Get or create user based on email from request
+    const userEmail = req.body.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email is required' });
+    }
+    
+    let user = await User.findOne({ email: userEmail });
     if (!user) {
       user = await User.create({
-        email: 'demo@learnflow.com',
-        name: 'Demo User'
+        email: userEmail,
+        name: userEmail.split('@')[0] // Use part before @ as default name
       });
     }
 

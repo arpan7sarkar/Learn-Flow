@@ -5,6 +5,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useUser } from '@clerk/clerk-react';
 
 import { getStudyCalendar, updateCalendarEvent, getAllStudyPlans } from '../lib/api';
 import { Loader2, RefreshCw, Upload, BookOpen, Calendar as CalendarIcon, CheckCircle2, Circle, X, Clock, AlignLeft, History, FolderOpen } from 'lucide-react';
@@ -14,6 +15,9 @@ import { format } from 'date-fns';
 
 
 export function StudyPlanner() {
+  const { user } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,10 +36,11 @@ export function StudyPlanner() {
   };
 
   const handleViewHistory = async () => {
+    if (!userEmail) return;
     setHistoryOpen(true);
     setHistoryLoading(true);
     try {
-      const response = await getAllStudyPlans();
+      const response = await getAllStudyPlans(userEmail);
       if (response.success) {
         setStudyPlans(response.data);
       }
@@ -47,10 +52,11 @@ export function StudyPlanner() {
   };
 
   const fetchEvents = useCallback(async () => {
+    if (!userEmail) return;
     setLoading(true);
     setError(null);
     try {
-      const response = await getStudyCalendar(undefined, undefined, undefined, currentPlanId || undefined);
+      const response = await getStudyCalendar(userEmail, undefined, undefined, currentPlanId || undefined);
       if (response.success) {
         // FullCalendar accepts standard ISO strings or Date objects  
         // The API returns structured objects or ISO strings.
@@ -96,7 +102,7 @@ export function StudyPlanner() {
     } finally {
       setLoading(false);
     }
-  }, [currentPlanId]);
+  }, [currentPlanId, userEmail]);
 
   useEffect(() => {
     fetchEvents();
@@ -131,7 +137,7 @@ export function StudyPlanner() {
     } : e));
 
     try {
-      await updateCalendarEvent(selectedEvent.id, newCompleted);
+      await updateCalendarEvent(selectedEvent.id, newCompleted, userEmail);
     } catch (err) {
       console.error('Failed to update event');
       // Revert on failure
@@ -377,6 +383,19 @@ export function StudyPlanner() {
                           </div>
                         </div>
                       )}
+                      
+                      {/* Status Badge */}
+                      {plan.status && plan.status !== 'not_started' && currentPlanId !== plan._id && (
+                        <div className="absolute top-0 right-0 p-2">
+                          <div className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider",
+                            plan.status === 'completed' ? "bg-green-500 text-black" : "bg-yellow-500 text-black"
+                          )}>
+                            {plan.status === 'completed' ? 'Done' : 'Active'}
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <h4 className={cn(
@@ -385,23 +404,66 @@ export function StudyPlanner() {
                           )}>
                             {plan.title || "Untitled Plan"}
                           </h4>
-                          <p className="text-xs text-brand-text-muted mt-1 flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> Created on {format(new Date(plan.createdAt), 'MMMM do, yyyy')}
-                          </p>
+                          <div className="flex items-center gap-3 mt-1">
+                            <p className="text-xs text-brand-text-muted flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {format(new Date(plan.createdAt), 'MMM do, yyyy')}
+                            </p>
+                            {plan.daysUntilExam !== null && plan.daysUntilExam !== undefined && (
+                              <p className={cn(
+                                "text-xs flex items-center gap-1",
+                                plan.daysUntilExam < 0 ? "text-gray-500" :
+                                plan.daysUntilExam <= 3 ? "text-red-400" : 
+                                plan.daysUntilExam <= 7 ? "text-yellow-400" : "text-brand-text-muted"
+                              )}>
+                                <CalendarIcon className="w-3 h-3" />
+                                {plan.daysUntilExam < 0 ? 'Exam passed' : 
+                                 plan.daysUntilExam === 0 ? 'Exam today!' : 
+                                 `${plan.daysUntilExam} days left`}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-3">
+                      
+                      {/* Progress Bar */}
+                      {plan.totalSessions > 0 && (
+                        <div className="mb-3">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs text-gray-400">Progress</span>
+                            <span className="text-xs font-bold text-white">{plan.completedSessions}/{plan.totalSessions} sessions</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-brand-gray rounded-full overflow-hidden">
+                            <div 
+                              className={cn(
+                                "h-full rounded-full transition-all",
+                                plan.completionRate === 100 ? "bg-green-500" : "bg-white"
+                              )}
+                              style={{ width: `${plan.completionRate}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-4 gap-2">
                         <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
-                          <span className="block text-xl font-bold text-white">{plan.subjectCount}</span>
-                          <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Subjects</span>
+                          <span className="block text-lg font-bold text-white">{plan.subjectCount}</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider">Subjects</span>
                         </div>
                         <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
-                          <span className="block text-xl font-bold text-white">{plan.topicCount}</span>
-                          <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Topics</span>
+                          <span className="block text-lg font-bold text-white">{plan.topicCount}</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider">Topics</span>
                         </div>
                         <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
-                          <span className={cn("block text-xl font-bold", plan.readiness > 70 ? "text-green-400" : "text-yellow-400")}>{Math.round(plan.readiness)}%</span>
-                          <span className="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Readiness</span>
+                          <span className={cn(
+                            "block text-lg font-bold",
+                            plan.completionRate === 100 ? "text-green-400" : 
+                            plan.completionRate > 50 ? "text-yellow-400" : "text-gray-400"
+                          )}>{plan.completionRate}%</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider">Complete</span>
+                        </div>
+                        <div className="bg-brand-black p-2 rounded-lg text-center border border-brand-gray">
+                          <span className={cn("block text-lg font-bold", plan.readiness > 70 ? "text-green-400" : "text-yellow-400")}>{Math.round(plan.readiness)}%</span>
+                          <span className="text-[9px] uppercase text-gray-500 font-bold tracking-wider">Ready</span>
                         </div>
                       </div>
                     </div>
