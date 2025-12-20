@@ -1,6 +1,7 @@
 import { parsePDF, extractTopicsFromText, extractExamDate } from '../services/pdfParser.js';
 import StudyPlan from '../models/StudyPlan.js';
 import User from '../models/User.js';
+import connectDB from '../config/db.js';
 
 /**
  * Upload and process syllabus PDF
@@ -8,6 +9,8 @@ import User from '../models/User.js';
  */
 export const uploadSyllabus = async (req, res) => {
   try {
+    await connectDB();
+    
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
@@ -76,6 +79,7 @@ export const uploadSyllabus = async (req, res) => {
  */
 export const getStudyPlan = async (req, res) => {
   try {
+    await connectDB();
     const studyPlan = await StudyPlan.findById(req.params.id);
     
     if (!studyPlan) {

@@ -2,6 +2,7 @@ import StudyPlan from '../models/StudyPlan.js';
 import CalendarEvent from '../models/CalendarEvent.js';
 import { generateStudyPlanWithAI } from '../services/geminiServices/planner.js';
 import { createCalendarEvents, getCalendarEvents, updateEventCompletion } from '../services/plannerEngine.js';
+import connectDB from '../config/db.js';
 
 /**
  * Generate study plan from existing study plan data
@@ -9,6 +10,7 @@ import { createCalendarEvents, getCalendarEvents, updateEventCompletion } from '
  */
 export const generateStudyPlan = async (req, res) => {
   try {
+    await connectDB();
     const { studyPlanId, hoursPerDay = 4, examDate } = req.body;
 
     const studyPlan = await StudyPlan.findById(studyPlanId);
@@ -63,6 +65,7 @@ export const generateStudyPlan = async (req, res) => {
  */
 export const getStudyPlan = async (req, res) => {
   try {
+    await connectDB();
     const { id } = req.params;
     const studyPlan = await StudyPlan.findById(id);
 
@@ -85,6 +88,7 @@ export const getStudyPlan = async (req, res) => {
  */
 export const getStudyCalendar = async (req, res) => {
   try {
+    await connectDB();
     const { studyPlanId, startDate, endDate } = req.query;
 
     let events = [];
@@ -157,6 +161,7 @@ export const getStudyCalendar = async (req, res) => {
  */
 export const updateCalendarEvent = async (req, res) => {
   try {
+    await connectDB();
     const { id } = req.params;
     const { completed } = req.body;
 
@@ -181,6 +186,7 @@ export const updateCalendarEvent = async (req, res) => {
  */
 export const clearCalendar = async (req, res) => {
   try {
+    await connectDB();
     const userEmail = req.query.userEmail || req.body.userEmail;
     if (!userEmail) {
       return res.status(400).json({ error: 'User email is required' });
@@ -208,6 +214,7 @@ export const clearCalendar = async (req, res) => {
  */
 export const getAllStudyPlans = async (req, res) => {
   try {
+    await connectDB();
     const User = (await import('../models/User.js')).default;
     const userEmail = req.query.userEmail;
     
@@ -273,6 +280,7 @@ export const getAllStudyPlans = async (req, res) => {
  */
 export const getStudyAnalytics = async (req, res) => {
   try {
+    await connectDB();
     const User = (await import('../models/User.js')).default;
     const userEmail = req.query.userEmail;
     
@@ -384,6 +392,7 @@ export const getStudyAnalytics = async (req, res) => {
  */
 export const deleteStudyPlan = async (req, res) => {
   try {
+    await connectDB();
     const { id } = req.params;
     const userEmail = req.query.userEmail;
     

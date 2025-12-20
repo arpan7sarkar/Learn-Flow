@@ -2,6 +2,7 @@ import { explainTopicWithAnalogy } from '../services/geminiServices/tutor.js';
 import { generateQuiz } from '../services/geminiServices/quiz.js';
 import QuizResult from '../models/QuizResult.js';
 import User from '../models/User.js';
+import connectDB from '../config/db.js';
 
 /**
  * Get AI explanation for a topic
@@ -11,6 +12,7 @@ import ChatHistory from '../models/ChatHistory.js';
 
 export const explainTopic = async (req, res) => {
   try {
+    await connectDB();
     const { topic, analogy = 'reallife', userId, sessionId } = req.body;
 
     if (!topic) {
@@ -107,6 +109,7 @@ export const createQuiz = async (req, res) => {
  */
 export const submitQuiz = async (req, res) => {
   try {
+    await connectDB();
     const { topic, answers, userId } = req.body;
 
     if (!topic || !answers || !Array.isArray(answers)) {
@@ -159,6 +162,7 @@ export const submitQuiz = async (req, res) => {
  */
 export const getQuizHistory = async (req, res) => {
   try {
+    await connectDB();
     const userEmail = req.query.userEmail;
     if (!userEmail) {
       return res.status(400).json({ error: 'User email is required' });
@@ -188,6 +192,7 @@ export const getQuizHistory = async (req, res) => {
  */
 export const getChatHistory = async (req, res) => {
   try {
+    await connectDB();
     const userEmail = req.query.userEmail;
     if (!userEmail) {
       return res.status(400).json({ error: 'User email is required' });
@@ -218,6 +223,7 @@ export const getChatHistory = async (req, res) => {
  */
 export const getChatSession = async (req, res) => {
   try {
+    await connectDB();
     const { sessionId } = req.params;
     const userEmail = req.query.userEmail;
     if (!userEmail) {
@@ -246,6 +252,7 @@ export const getChatSession = async (req, res) => {
  */
 export const deleteChatSession = async (req, res) => {
   try {
+    await connectDB();
     const { sessionId } = req.params;
     const userEmail = req.query.userEmail;
     if (!userEmail) {
