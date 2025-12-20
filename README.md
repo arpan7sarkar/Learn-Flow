@@ -145,7 +145,7 @@ Learn-Flow/
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/learn-flow.git
+git clone https://github.com/arpan7sarkar/Learn-Flow.git
 cd learn-flow
 ```
 
